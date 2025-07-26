@@ -1,14 +1,18 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = {
-  entry: './src/index.js',
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
-    publicPath: './',
-    clean: true,
-  },
+module.exports = (env, argv) => {
+  const isProduction = argv.mode === 'production';
+  
+  return {
+    entry: './src/index.js',
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: 'bundle.js',
+      publicPath: isProduction ? './' : '/',
+      clean: true,
+    },
   module: {
     rules: [
       {
@@ -34,10 +38,16 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html'
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'logo', to: 'logo' }
+      ]
     })
   ],
-  devServer: {
-    historyApiFallback: true,
-    port: 3001
-  }
+    devServer: {
+      historyApiFallback: true,
+      port: 3001
+    }
+  };
 };

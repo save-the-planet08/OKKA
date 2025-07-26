@@ -169,7 +169,7 @@ const App = () => {
       {/* Header mit OKKA-Logo */}
       <header className="header">
         <div className="logo" onClick={() => {setCurrentView('home'); setCurrentGame(null);}}>
-          <img src="/logo.png" alt="OKKA Logo" className="logo-image" />
+          <img src="/logo/logo.png" alt="OKKA Logo" className="logo-image" />
           <h1>OKKA</h1>
           <p>Online-Spiele. Kostenlos. Keine Anmeldung.</p>
           <span className="logo-claim">Tausend und ein Spiel. Nur hier.</span>
@@ -274,7 +274,7 @@ const App = () => {
 
       {/* Footer mit OKKA-Branding */}
       <footer className="footer">
-        <img src="/logo.png" alt="OKKA Miniatur Logo" className="footer-logo" />
+        <img src="/logo/logo.png" alt="OKKA Miniatur Logo" className="footer-logo" />
         <div className="footer-text">
           Die beste Gaming-Plattform für kostenlose Online-Spiele
         </div>
