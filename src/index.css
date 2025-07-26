@@ -1,0 +1,633 @@
+/* OKKA - Comic-Style Gaming Platform */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+/* Reset und Grundstyles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --okka-orange: #F6801D;
+    --okka-orange-light: #FF9A47;
+    --okka-orange-dark: #E5681A;
+    --okka-brown: #3D2A1A;
+    --okka-yellow: #FFC700;
+    --okka-blue: #2F80ED;
+    --okka-lightgray: #F9F9F9;
+    --okka-gray: #E5E5E5;
+    --okka-darkgray: #666666;
+    --okka-white: #FFFFFF;
+    --border-radius: 15px;
+    --comic-shadow: 4px 4px 0px var(--okka-brown);
+    --hover-shadow: 6px 6px 0px var(--okka-brown);
+}
+
+/* Light Mode Variables (Default) */
+:root {
+    --okka-background: #FFFFFF;
+    --okka-surface: #F9F9F9;
+    --okka-text: #3D2A1A;
+    --okka-text-secondary: #666666;
+    --okka-border: #3D2A1A;
+}
+
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --okka-background: #1A1A1A !important;
+    --okka-surface: #2D2D2D !important;
+    --okka-text: #FFFFFF !important;
+    --okka-text-secondary: #CCCCCC !important;
+    --okka-border: #555555 !important;
+    --okka-lightgray: #333333 !important;
+    --okka-gray: #404040 !important;
+    --comic-shadow: 4px 4px 0px #000000 !important;
+    --hover-shadow: 6px 6px 0px #000000 !important;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background: var(--okka-background);
+    min-height: 100vh;
+    color: var(--okka-text);
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--okka-background);
+}
+
+/* Header mit Comic-Style */
+.header {
+    background: var(--okka-surface);
+    border: 4px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    padding: 25px 250px 25px 25px;
+    margin-bottom: 25px;
+    box-shadow: var(--comic-shadow);
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: visible;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.logo {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.3s ease;
+    position: relative;
+    flex: 1;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.logo-image {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    filter: drop-shadow(3px 3px 0px var(--okka-border));
+    position: absolute;
+    top: -30px;
+    right: -200px;
+    z-index: 5;
+    transition: all 0.3s ease;
+}
+
+.logo h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3.5em;
+    color: var(--okka-orange);
+    text-shadow: 3px 3px 0px var(--okka-border);
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.logo p {
+    color: var(--okka-text);
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 5px 0;
+}
+
+.logo-claim {
+    font-size: 1em;
+    color: var(--okka-text-secondary);
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* Navigation im Comic-Style */
+.nav {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.nav a {
+    background: var(--okka-surface);
+    color: var(--okka-text);
+    text-decoration: none;
+    padding: 12px 24px;
+    border: 3px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    box-shadow: 3px 3px 0px var(--okka-border);
+    cursor: pointer;
+    position: relative;
+    font-family: 'Quicksand', sans-serif;
+}
+
+.nav a:hover, .nav a.active {
+    background: var(--okka-orange);
+    color: var(--okka-white);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--okka-border);
+}
+
+.nav a:hover {
+    background: var(--okka-orange-light);
+}
+
+.nav a.active {
+    background: var(--okka-orange-dark);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    background: var(--okka-surface);
+    color: var(--okka-text);
+    border: 3px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    padding: 12px 16px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--comic-shadow);
+    font-family: 'Quicksand', sans-serif;
+}
+
+.theme-toggle:hover {
+    background: var(--okka-orange);
+    color: var(--okka-white);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Hauptbereich */
+.main-content {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+/* Werbebereiche im Comic-Style */
+.ad-left, .ad-right {
+    width: 160px;
+    position: sticky;
+    top: 20px;
+}
+
+.ad-top, .ad-bottom {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.ad-placeholder {
+    background: var(--okka-lightgray);
+    border: 3px dashed var(--okka-border);
+    padding: 20px;
+    text-align: center;
+    color: var(--okka-text);
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    font-family: 'Quicksand', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.ad-placeholder.vertical {
+    height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+}
+
+/* Spielbereich im Comic-Style */
+.game-area {
+    flex: 1;
+    background: var(--okka-surface);
+    border: 4px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--comic-shadow);
+    min-height: 600px;
+    transition: all 0.3s ease;
+}
+
+/* Hero-Bereich für Homepage */
+.hero-section {
+    text-align: center;
+    padding: 40px 0;
+    background: linear-gradient(135deg, var(--okka-gray) 0%, var(--okka-surface) 100%);
+    border-radius: var(--border-radius);
+    margin-bottom: 30px;
+    border: 3px solid var(--okka-border);
+    transition: all 0.3s ease;
+}
+
+.hero-claim {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5em;
+    color: var(--okka-text);
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 0px var(--okka-orange);
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.hero-button {
+    background: var(--okka-orange);
+    color: var(--okka-white);
+    border: 4px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: 700;
+    font-family: 'Fredoka One', cursive;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--comic-shadow);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.hero-button:hover {
+    background: var(--okka-orange-light);
+    color: var(--okka-white);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.hero-button.secondary {
+    background: var(--okka-orange-dark);
+}
+
+.hero-button.secondary:hover {
+    background: var(--okka-orange);
+    color: var(--okka-white);
+}
+
+/* Spieleliste im Comic-Style */
+.game-list h2 {
+    font-family: 'Fredoka One', cursive;
+    color: var(--okka-text);
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-align: center;
+    text-shadow: 2px 2px 0px var(--okka-orange);
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.game-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: var(--hover-shadow);
+    background: var(--okka-gray);
+}
+
+.game-card:hover .game-thumbnail {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.game-thumbnail {
+    font-size: 4.5em;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(2px 2px 0px var(--okka-border));
+}
+
+.game-card h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: var(--okka-text);
+    text-shadow: 1px 1px 0px var(--okka-orange);
+}
+
+.game-card p {
+    color: var(--okka-text-secondary);
+    font-size: 1em;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.game-card::before {
+    content: "LOS GEHT'S!";
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--okka-orange);
+    color: var(--okka-white);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    border: 2px solid var(--okka-border);
+    font-family: 'Fredoka One', cursive;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.game-card:hover::before {
+    bottom: 15px;
+    background: var(--okka-orange-light);
+    color: var(--okka-white);
+}
+
+.game-card {
+    background: var(--okka-surface);
+    border: 4px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    padding: 25px 25px 35px 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--comic-shadow);
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+/* Spielcontainer */
+.game-container {
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.game-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px dashed var(--okka-brown);
+}
+
+.back-button {
+    background: var(--okka-blue);
+    color: var(--okka-white);
+    border: 3px solid var(--okka-brown);
+    border-radius: var(--border-radius);
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Quicksand', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: var(--comic-shadow);
+}
+
+.back-button:hover {
+    background: var(--okka-yellow);
+    color: var(--okka-brown);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hover-shadow);
+}
+
+#current-game-title {
+    font-family: 'Fredoka One', cursive;
+    color: var(--okka-brown);
+    font-size: 2.2em;
+    text-shadow: 2px 2px 0px var(--okka-yellow);
+}
+
+.game-frame {
+    background: var(--okka-border);
+    border: 4px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--okka-white);
+    font-size: 1.2em;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+#gameCanvas {
+    border-radius: calc(var(--border-radius) - 4px);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Footer im Comic-Style */
+.footer {
+    background: var(--okka-surface);
+    border: 3px solid var(--okka-border);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin-top: 30px;
+    text-align: center;
+    box-shadow: var(--comic-shadow);
+    transition: all 0.3s ease;
+}
+
+.footer-logo {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    filter: drop-shadow(1px 1px 0px var(--okka-border));
+}
+
+.footer-text {
+    color: var(--okka-text);
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.footer-copyright {
+    font-family: 'Fredoka One', cursive;
+    color: var(--okka-orange);
+    font-size: 1.1em;
+    text-shadow: 1px 1px 0px var(--okka-border);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .ad-left, .ad-right {
+        width: 100%;
+        position: static;
+        order: 3;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 100px;
+        writing-mode: initial;
+    }
+    
+    .game-area {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 25px;
+        min-height: 120px;
+    }
+    
+    .logo h1 {
+        font-size: 2.8em;
+    }
+    
+    .logo-image {
+        width: 100px;
+        height: 100px;
+        position: static;
+        margin-bottom: 15px;
+    }
+    
+    .nav {
+        gap: 10px;
+    }
+    
+    .nav a {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+    
+    .hero-claim {
+        font-size: 2em;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .game-area {
+        padding: 20px;
+    }
+    
+    .game-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .logo h1 {
+        font-size: 2.2em;
+    }
+    
+    .logo-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .nav a {
+        padding: 8px 12px;
+        font-size: 0.8em;
+    }
+    
+    .hero-claim {
+        font-size: 1.6em;
+    }
+    
+    .hero-button {
+        padding: 12px 24px;
+        font-size: 1em;
+    }
+}
+
+/* Spezielle Comic-Animationen */
+@keyframes bounce {
+    0%, 20%, 60%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    80% {
+        transform: translateY(-5px);
+    }
+}
+
+.bounce-animation {
+    animation: bounce 2s infinite;
+}
+
+/* Hover-Effekte für mehr Comic-Feeling */
+.nav a:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px var(--okka-brown);
+}
+
+.hero-button:active, .back-button:active {
+    transform: translate(1px, 1px);
+    box-shadow: 3px 3px 0px var(--okka-brown);
+}
+
+.game-card:active {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--okka-brown);
+}
