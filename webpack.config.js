@@ -8,7 +8,7 @@ module.exports = (env, argv) => {
   return {
     entry: './src/index.js',
     mode: isProduction ? 'production' : 'development',
-    devtool: isProduction ? false : 'source-map',
+    devtool: isProduction ? false : 'cheap-module-source-map',
     optimization: {
       minimize: isProduction,
       splitChunks: false,
