@@ -124,6 +124,42 @@ const App = () => {
       category: "puzzle",
       description: "Kartenspiel gegen den Dealer",
       emoji: "🃏"
+    },
+    stack: {
+      title: "Stack",
+      category: "arcade",
+      description: "Baue den höchsten Turm",
+      emoji: "🏗️"
+    },
+    tripwire: {
+      title: "Tripwire Hook",
+      category: "action",
+      description: "Schwinge durch die Wolkenkratzer",
+      emoji: "🪝"
+    },
+    basejump: {
+      title: "Base Jump",
+      category: "action",
+      description: "Springe vom Turm und überlebe",
+      emoji: "🪂"
+    },
+    clickspeed: {
+      title: "Click Speed Test",
+      category: "puzzle",
+      description: "Teste deine Klickgeschwindigkeit",
+      emoji: "⚡"
+    },
+    longjump: {
+      title: "Long Jump",
+      category: "action",
+      description: "Springe so weit wie möglich",
+      emoji: "🏃"
+    },
+    pvpcombat: {
+      title: "PvP Combat",
+      category: "action",
+      description: "Zwei-Spieler Kampf Arena",
+      emoji: "⚔️"
     }
   };
 
