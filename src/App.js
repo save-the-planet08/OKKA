@@ -72,43 +72,43 @@ const App = () => {
       emoji: "🦘"
     },
     flappybird: {
-      title: "Flappy Bird",
+      title: "Flying Bird",
       category: "arcade",
       description: "Fliege durch die Rohre",
       emoji: "🐦"
     },
     slither: {
-      title: "Slither.io",
+      title: "Snake Battle",
       category: "action",
       description: "Multiplayer Snake mit Waffen",
       emoji: "🐍"
     },
     subway: {
-      title: "Subway Surfers",
+      title: "Train Runner",
       category: "action",
       description: "Endlos-Läufer durch die U-Bahn",
       emoji: "🚇"
     },
     rider: {
-      title: "Rider",
+      title: "Stunt Driver",
       category: "action",
       description: "Auto-Stunts mit Loopings",
       emoji: "🏎️"
     },
     hillclimb: {
-      title: "Hill Climb Racing",
+      title: "Mountain Racer",
       category: "action",
       description: "Bergauf-Rennen mit Physik",
       emoji: "🏔️"
     },
     mario: {
-      title: "Mario Bros.",
+      title: "Super Jumper",
       category: "arcade",
       description: "Klassisches Jump'n'Run",
       emoji: "🍄"
     },
     duckhunt: {
-      title: "Duck Hunt",
+      title: "Bird Hunter",
       category: "action",
       description: "Enten jagen mit der Maus",
       emoji: "🦆"
