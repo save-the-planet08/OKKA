@@ -12,10 +12,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.html",
-      "headers": {
-        "Content-Security-Policy": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self';"
-      }
+      "dest": "/index.html"
     }
   ]
 }
