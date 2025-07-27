@@ -40,7 +40,7 @@ module.exports = (env, argv) => {
                 useBuiltIns: false
               }], 
               ['@babel/preset-react', {
-                runtime: 'automatic'
+                runtime: 'classic'
               }]
             ],
             cacheDirectory: false

@@ -1,12 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 
 // Simple error handling
 try {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<App />);
+  ReactDOM.render(<App />, document.getElementById('root'));
 } catch (error) {
   console.error('OKKA Loading Error:', error);
   document.getElementById('root').innerHTML = `
