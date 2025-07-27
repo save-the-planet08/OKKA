@@ -7,6 +7,19 @@ module.exports = (env, argv) => {
   
   return {
     entry: './src/index.js',
+    mode: isProduction ? 'production' : 'development',
+    devtool: isProduction ? false : 'source-map',
+    optimization: {
+      minimize: isProduction,
+      splitChunks: false,
+    },
+    resolve: {
+      fallback: {
+        "fs": false,
+        "path": false,
+        "os": false
+      }
+    },
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'bundle.js',
@@ -21,7 +34,16 @@ module.exports = (env, argv) => {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
+            presets: [
+              ['@babel/preset-env', { 
+                targets: '> 0.25%, not dead',
+                useBuiltIns: false
+              }], 
+              ['@babel/preset-react', {
+                runtime: 'automatic'
+              }]
+            ],
+            cacheDirectory: false
           }
         }
       },
