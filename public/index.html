@@ -6,6 +6,93 @@
     <title>OKKA - Online-Games, kostenlos, keine Anmeldung</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3009301794181961"
          crossorigin="anonymous"></script>
+    <script>
+        // ULTIMATE MetaMask Error Suppression - No Extension Errors Allowed
+        (function() {
+            'use strict';
+            
+            // Global error interceptor
+            function interceptError(e) {
+                const errorSources = [
+                    'MetaMask', 'chrome-extension', 'Failed to connect',
+                    'Extension context', 'ethereum', 'web3', 'wallet',
+                    'connect to MetaMask', 'nkbihfbeogaeaoehlefnkodbefgpgknn'
+                ];
+                
+                const shouldSuppress = errorSources.some(source => {
+                    return (e.message && e.message.includes(source)) ||
+                           (e.filename && e.filename.includes(source)) ||
+                           (e.error && e.error.message && e.error.message.includes(source)) ||
+                           (e.reason && e.reason.toString().includes(source));
+                });
+                
+                if (shouldSuppress) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            }
+            
+            // Apply multiple layers of protection
+            window.addEventListener('error', interceptError, true);
+            window.addEventListener('unhandledrejection', interceptError, true);
+            document.addEventListener('error', interceptError, true);
+            
+            // Override all console methods
+            ['error', 'warn', 'log'].forEach(method => {
+                const original = console[method];
+                console[method] = function(...args) {
+                    const message = args.join(' ');
+                    if (message.includes('MetaMask') || 
+                        message.includes('chrome-extension') ||
+                        message.includes('Failed to connect')) {
+                        return;
+                    }
+                    original.apply(console, args);
+                };
+            });
+            
+            // Intercept React error boundaries
+            window.addEventListener('reacterror', interceptError, true);
+            
+            // Monitor for dynamic script injection
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'SCRIPT' && 
+                            node.src && node.src.includes('chrome-extension')) {
+                            node.onerror = function() { return false; };
+                        }
+                    });
+                });
+            });
+            
+            // Start monitoring after DOM loads
+            document.addEventListener('DOMContentLoaded', function() {
+                observer.observe(document, {
+                    childList: true,
+                    subtree: true
+                });
+                
+                // Reapply all handlers
+                window.addEventListener('error', interceptError, true);
+                window.addEventListener('unhandledrejection', interceptError, true);
+            });
+            
+            // Block extension detection attempts
+            if (typeof window.ethereum !== 'undefined') {
+                delete window.ethereum;
+            }
+            
+            Object.defineProperty(window, 'ethereum', {
+                get: function() { return undefined; },
+                set: function() { return false; },
+                configurable: false
+            });
+            
+        })();
+    </script>
 </head>
 <body>
     <div id="root"></div>

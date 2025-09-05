@@ -160,6 +160,48 @@ const App = () => {
       category: "action",
       description: "Zwei-Spieler Kampf Arena",
       emoji: "⚔️"
+    },
+    boxing: {
+      title: "Boxing Champion",
+      category: "action",
+      description: "Kämpfe dich zum Box-Champion",
+      emoji: "🥊"
+    },
+    redbirds: {
+      title: "Red Birds",
+      category: "action",
+      description: "Zerstöre Türme und eliminiere Schweine",
+      emoji: "🐦"
+    },
+    headdriver: {
+      title: "Head Driver Battle",
+      category: "action",
+      description: "Zwei-Spieler Auto-Kampf Arena",
+      emoji: "🏎️"
+    },
+    battlesnake: {
+      title: "Battle Snake IO",
+      category: "action",
+      description: "Zwei-Spieler Snake Schlacht Arena",
+      emoji: "🐍"
+    },
+    bikerunner: {
+      title: "Bike City Runner",
+      category: "action",
+      description: "Fahrrad-Endlos-Läufer durch die Stadt",
+      emoji: "🚴"
+    },
+    boatcombat: {
+      title: "Boat Combat",
+      category: "action",
+      description: "Epische Seeschlacht mit Power-ups",
+      emoji: "⛵"
+    },
+    tabletennis: {
+      title: "Table Tennis",
+      category: "action",
+      description: "Tischtennis mit speziellen Fähigkeiten",
+      emoji: "🏓"
     }
   };
 
