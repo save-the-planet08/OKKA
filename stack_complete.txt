@@ -1,0 +1,171 @@
+		// STACK GAME - Tower building with falling platforms
+		function initStack(canvas, ctx) {
+		    canvas.width = 800;
+		    canvas.height = 600;
+		    
+		    let gameRunning = true;
+		    let animationId;
+		    let score = 0;
+		    let gameOver = false;
+		    
+		    let stack = []; // All placed platforms
+		    let currentPlatform = null; // Moving platform
+		    let targetWidth = 100; // Width of the base platform
+		    let platformHeight = 40;
+		    let moveSpeed = 2;
+		    let dropSpeed = 3;
+		    
+		    // Colors
+		    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FFB347', '#87CEEB'];
+		    
+		    function createBasePlatform() {
+		        stack = [{
+		            x: canvas.width/2 - targetWidth/2,
+		            y: canvas.height - platformHeight,
+		            width: targetWidth,
+		            height: platformHeight,
+		            color: colors[0],
+		            settled: true
+		        }];
+		    }
+		    
+		    function spawnNewPlatform() {
+		        if (stack.length === 0) return;
+		        
+		        let lastPlatform = stack[stack.length - 1];
+		        currentPlatform = {
+		            x: 0,
+		            y: lastPlatform.y - platformHeight - 10,
+		            width: Math.max(targetWidth * 0.8, 50), // Platform gets slightly smaller each time
+		            height: platformHeight,
+		            color: colors[stack.length % colors.length],
+		            direction: Math.random() > 0.5 ? 1 : -1,
+		            settled: false,
+		            dropping: false
+		        };
+		        
+		        // Start from random side
+		        if (currentPlatform.direction === 1) {
+		            currentPlatform.x = -currentPlatform.width;
+		        } else {
+		            currentPlatform.x = canvas.width;
+		        }
+		    }
+		    
+		    function updateGame() {
+		        if (!gameRunning || gameOver) return;
+		        
+		        if (currentPlatform && !currentPlatform.settled && !currentPlatform.dropping) {
+		            // Move platform side to side
+		            currentPlatform.x += moveSpeed * currentPlatform.direction;
+		            
+		            // Bounce off edges
+		            if (currentPlatform.x <= -currentPlatform.width || 
+		                currentPlatform.x >= canvas.width) {
+		                currentPlatform.direction *= -1;
+		            }
+		        }
+		        
+		        if (currentPlatform && currentPlatform.dropping) {
+		            // Platform is falling
+		            currentPlatform.y += dropSpeed;
+		            
+		            // Check collision with top platform
+		            let lastPlatform = stack[stack.length - 1];
+		            if (currentPlatform.y + currentPlatform.height >= lastPlatform.y) {
+		                // Landing!
+		                let leftEdge = Math.max(currentPlatform.x, lastPlatform.x);
+		                let rightEdge = Math.min(currentPlatform.x + currentPlatform.width, 
+		                                       lastPlatform.x + lastPlatform.width);
+		                let overlapWidth = rightEdge - leftEdge;
+		                
+		                if (overlapWidth <= 0) {
+		                    // No overlap - game over
+		                    gameOver = true;
+		                    return;
+		                }
+		                
+		                // Perfect landing bonus
+		                let perfectBonus = 1;
+		                if (overlapWidth >= currentPlatform.width * 0.95) {
+		                    perfectBonus = 2;
+		                    targetWidth = Math.min(targetWidth + 5, 120); // Grow platform for perfect landing
+		                } else {
+		                    targetWidth = Math.max(targetWidth - 2, 30); // Shrink platform
+		                }
+		                
+		                // Add to stack with adjusted size
+		                currentPlatform.x = leftEdge;
+		                currentPlatform.width = overlapWidth;
+		                currentPlatform.y = lastPlatform.y - platformHeight;
+		                currentPlatform.settled = true;
+		                currentPlatform.dropping = false;
+		                
+		                stack.push(currentPlatform);
+		                score += Math.floor(overlapWidth) * perfectBonus;
+		                
+		                // Spawn next platform
+		                currentPlatform = null;
+		                setTimeout(() => {
+		                    if (gameRunning) spawnNewPlatform();
+		                }, 500);
+		            }
+		        }
+		    }
+		    
+		    function draw() {
+		        // Sky gradient background
+		        let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+		        gradient.addColorStop(0, '#87CEEB');
+		        gradient.addColorStop(1, '#E0F6FF');
+		        ctx.fillStyle = gradient;
+		        ctx.fillRect(0, 0, canvas.width, canvas.height);
+		        
+		        // Draw stack platforms
+		        stack.forEach(platform => {
+		            ctx.fillStyle = platform.color;
+		            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+		            
+		            // Platform border
+		            ctx.strokeStyle = '#333';
+		            ctx.lineWidth = 2;
+		            ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+		        });
+		        
+		        // Draw current moving platform
+		        if (currentPlatform && !currentPlatform.settled) {
+		            ctx.fillStyle = currentPlatform.color;
+		            ctx.fillRect(currentPlatform.x, currentPlatform.y, currentPlatform.width, currentPlatform.height);
+		            
+		            ctx.strokeStyle = '#333';
+		            ctx.lineWidth = 2;
+		            ctx.strokeRect(currentPlatform.x, currentPlatform.y, currentPlatform.width, currentPlatform.height);
+		            
+		            // Drop indicator
+		            if (!currentPlatform.dropping) {
+		                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+		                ctx.font = '20px Arial';
+		                ctx.textAlign = 'center';
+		                ctx.fillText('CLICK TO DROP!', canvas.width/2, 50);
+		            }
+		        }
+		        
+		        // UI
+		        ctx.fillStyle = '#000';
+		        ctx.font = '24px Arial';
+		        ctx.textAlign = 'left';
+		        ctx.fillText('Score: ' + score, 20, 40);
+		        ctx.fillText('Level: ' + stack.length, 20, 70);
+		        
+		        if (gameOver) {
+		            // Game over screen
+		            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+		            ctx.fillRect(0, 0, canvas.width, canvas.height);
+		            
+		            ctx.fillStyle = '#FFF';
+		            ctx.font = '48px Arial';
+		            ctx.textAlign = 'center';
+		            ctx.fillText('TOWER COLLAPSED!', canvas.width/2, canvas.height/2 - 50);
+		            
+		            ctx.font = '32px Arial';
+		            ctx.fillText('Final Score: ' + score, canvas.width/2, canvas.height/2);

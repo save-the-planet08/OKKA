@@ -1,0 +1,501 @@
+		function initPvPCombat(canvas, ctx) {
+		    canvas.width = 800;
+		    canvas.height = 600;
+		    
+		    let gameRunning = true;
+		    let animationId;
+		    let gameState = 'setup'; // 'setup', 'battle', 'victory'
+		    
+		    // Players
+		    let player1 = {
+		        x: 150,
+		        y: 400,
+		        vx: 0,
+		        vy: 0,
+		        width: 30,
+		        height: 40,
+		        health: 100,
+		        maxHealth: 100,
+		        facing: 1, // 1 = right, -1 = left
+		        onGround: false,
+		        weapon: 'pistol',
+		        ammo: 12,
+		        maxAmmo: 12,
+		        reloadTime: 0,
+		        maxReloadTime: 120, // 2 seconds
+		        lastShot: 0,
+		        fireRate: 300, // ms between shots
+		        kills: 0,
+		        animFrame: 0,
+		        muzzleFlash: 0,
+		        hitEffect: 0,
+		        color: '#4169E1'
+		    };
+		    
+		    let player2 = {
+		        x: 650,
+		        y: 400,
+		        vx: 0,
+		        vy: 0,
+		        width: 30,
+		        height: 40,
+		        health: 100,
+		        maxHealth: 100,
+		        facing: -1,
+		        onGround: false,
+		        weapon: 'pistol',
+		        ammo: 12,
+		        maxAmmo: 12,
+		        reloadTime: 0,
+		        maxReloadTime: 120,
+		        lastShot: 0,
+		        fireRate: 300,
+		        kills: 0,
+		        animFrame: 0,
+		        muzzleFlash: 0,
+		        hitEffect: 0,
+		        color: '#E74C3C'
+		    };
+		    
+		    // Game mechanics
+		    let bullets = [];
+		    let particles = [];
+		    let explosions = [];
+		    let powerUps = [];
+		    let map = [];
+		    let roundNumber = 1;
+		    let maxRounds = 5;
+		    let roundTimer = 0;
+		    let maxRoundTime = 180 * 60; // 3 minutes in frames
+		    
+		    // Controls
+		    let keys = {
+		        // Player 1 (WASD)
+		        w: false, a: false, s: false, d: false, shift: false,
+		        // Player 2 (Arrow keys)
+		        up: false, left: false, down: false, right: false, enter: false
+		    };
+		    
+		    // Weapons
+		    const weapons = {
+		        pistol: { damage: 25, fireRate: 300, ammo: 12, spread: 0.1, bulletSpeed: 15, color: '#FFD700' },
+		        shotgun: { damage: 15, fireRate: 800, ammo: 8, spread: 0.3, bulletSpeed: 12, pellets: 5, color: '#FF4500' },
+		        rifle: { damage: 35, fireRate: 150, ammo: 30, spread: 0.05, bulletSpeed: 20, color: '#00FF00' },
+		        rocket: { damage: 75, fireRate: 2000, ammo: 3, spread: 0, bulletSpeed: 8, explosive: true, color: '#FF0000' }
+		    };
+		    
+		    function initializeMap() {
+		        map = [
+		            // Ground platforms
+		            { x: 0, y: 550, width: 800, height: 50, type: 'ground' },
+		            
+		            // Lower platforms
+		            { x: 100, y: 450, width: 150, height: 20, type: 'platform' },
+		            { x: 550, y: 450, width: 150, height: 20, type: 'platform' },
+		            
+		            // Middle platforms
+		            { x: 200, y: 350, width: 100, height: 20, type: 'platform' },
+		            { x: 500, y: 350, width: 100, height: 20, type: 'platform' },
+		            
+		            // Center elevated platform
+		            { x: 350, y: 250, width: 100, height: 20, type: 'platform' },
+		            
+		            // Cover walls
+		            { x: 300, y: 480, width: 20, height: 70, type: 'wall' },
+		            { x: 480, y: 480, width: 20, height: 70, type: 'wall' },
+		            
+		            // Upper corner platforms
+		            { x: 50, y: 200, width: 100, height: 20, type: 'platform' },
+		            { x: 650, y: 200, width: 100, height: 20, type: 'platform' }
+		        ];
+		        
+		        // Add power-up spawn points
+		        spawnPowerUp(400, 230); // Center platform
+		        spawnPowerUp(175, 430); // Lower left
+		        spawnPowerUp(625, 430); // Lower right
+		    }
+		    
+		    function spawnPowerUp(x, y) {
+		        let types = ['health', 'ammo', 'weapon'];
+		        let type = types[Math.floor(Math.random() * types.length)];
+		        let weaponType = Object.keys(weapons)[Math.floor(Math.random() * Object.keys(weapons).length)];
+		        
+		        powerUps.push({
+		            x: x,
+		            y: y,
+		            type: type,
+		            weaponType: weaponType,
+		            animFrame: 0,
+		            respawnTime: 0,
+		            maxRespawnTime: 600 // 10 seconds
+		        });
+		    }
+		    
+		    function updateGame() {
+		        if (!gameRunning || gameState !== 'battle') return;
+		        
+		        roundTimer++;
+		        
+		        // Update players
+		        updatePlayer(player1);
+		        updatePlayer(player2);
+		        
+		        // Update bullets
+		        bullets = bullets.filter(bullet => {
+		            bullet.x += bullet.vx;
+		            bullet.y += bullet.vy;
+		            bullet.life--;
+		            
+		            // Check map collisions
+		            for (let platform of map) {
+		                if (bullet.x >= platform.x && bullet.x <= platform.x + platform.width &&
+		                    bullet.y >= platform.y && bullet.y <= platform.y + platform.height) {
+		                    
+		                    if (bullet.explosive) {
+		                        createExplosion(bullet.x, bullet.y, 60);
+		                    }
+		                    
+		                    // Impact particles
+		                    for (let i = 0; i < 5; i++) {
+		                        particles.push({
+		                            x: bullet.x,
+		                            y: bullet.y,
+		                            vx: (Math.random() - 0.5) * 6,
+		                            vy: -Math.random() * 4,
+		                            life: 30,
+		                            size: 2,
+		                            color: '#888888'
+		                        });
+		                    }
+		                    
+		                    return false;
+		                }
+		            }
+		            
+		            // Check player collisions
+		            if (checkBulletPlayerCollision(bullet, player1) && bullet.owner !== 'player1') {
+		                damagePlayer(player1, bullet.damage);
+		                if (bullet.explosive) {
+		                    createExplosion(bullet.x, bullet.y, 60);
+		                }
+		                return false;
+		            }
+		            
+		            if (checkBulletPlayerCollision(bullet, player2) && bullet.owner !== 'player2') {
+		                damagePlayer(player2, bullet.damage);
+		                if (bullet.explosive) {
+		                    createExplosion(bullet.x, bullet.y, 60);
+		                }
+		                return false;
+		            }
+		            
+		            return bullet.life > 0 && bullet.x >= -50 && bullet.x <= canvas.width + 50 &&
+		                   bullet.y >= -50 && bullet.y <= canvas.height + 50;
+		        });
+		        
+		        // Update particles
+		        particles = particles.filter(particle => {
+		            particle.x += particle.vx;
+		            particle.y += particle.vy;
+		            particle.vy += 0.1; // gravity
+		            particle.life--;
+		            particle.size *= 0.98;
+		            return particle.life > 0;
+		        });
+		        
+		        // Update explosions
+		        explosions = explosions.filter(explosion => {
+		            explosion.radius += explosion.expandSpeed;
+		            explosion.life--;
+		            explosion.alpha = explosion.life / explosion.maxLife;
+		            return explosion.life > 0;
+		        });
+		        
+		        // Update power-ups
+		        powerUps.forEach(powerUp => {
+		            powerUp.animFrame += 0.1;
+		            
+		            if (powerUp.respawnTime > 0) {
+		                powerUp.respawnTime--;
+		            }
+		            
+		            // Check player pickups
+		            if (powerUp.respawnTime === 0) {
+		                if (checkPlayerPowerUpCollision(player1, powerUp)) {
+		                    applyPowerUp(player1, powerUp);
+		                    powerUp.respawnTime = powerUp.maxRespawnTime;
+		                } else if (checkPlayerPowerUpCollision(player2, powerUp)) {
+		                    applyPowerUp(player2, powerUp);
+		                    powerUp.respawnTime = powerUp.maxRespawnTime;
+		                }
+		            }
+		        });
+		        
+		        // Update visual effects
+		        player1.muzzleFlash *= 0.8;
+		        player2.muzzleFlash *= 0.8;
+		        player1.hitEffect *= 0.9;
+		        player2.hitEffect *= 0.9;
+		        
+		        // Check win conditions
+		        if (player1.health <= 0) {
+		            player2.kills++;
+		            if (player2.kills >= Math.ceil(maxRounds / 2)) {
+		                gameState = 'victory';
+		            } else {
+		                respawnPlayer(player1);
+		                roundNumber++;
+		            }
+		        } else if (player2.health <= 0) {
+		            player1.kills++;
+		            if (player1.kills >= Math.ceil(maxRounds / 2)) {
+		                gameState = 'victory';
+		            } else {
+		                respawnPlayer(player2);
+		                roundNumber++;
+		            }
+		        }
+		        
+		        // Round time limit
+		        if (roundTimer >= maxRoundTime) {
+		            // Draw - reset round
+		            respawnPlayer(player1);
+		            respawnPlayer(player2);
+		            roundNumber++;
+		        }
+		    }
+		    
+		    function updatePlayer(player) {
+		        // Reduce reload time
+		        if (player.reloadTime > 0) {
+		            player.reloadTime--;
+		            if (player.reloadTime === 0) {
+		                player.ammo = player.maxAmmo;
+		            }
+		        }
+		        
+		        // Apply gravity
+		        if (!player.onGround) {
+		            player.vy += 0.5;
+		        }
+		        
+		        // Movement input
+		        let moveSpeed = 4;
+		        let jumpPower = 12;
+		        
+		        if (player === player1) {
+		            if (keys.a) {
+		                player.vx = -moveSpeed;
+		                player.facing = -1;
+		                player.animFrame += 0.2;
+		            } else if (keys.d) {
+		                player.vx = moveSpeed;
+		                player.facing = 1;
+		                player.animFrame += 0.2;
+		            } else {
+		                player.vx *= 0.8;
+		            }
+		            
+		            if (keys.w && player.onGround) {
+		                player.vy = -jumpPower;
+		                player.onGround = false;
+		            }
+		            
+		            if (keys.s && player.onGround) {
+		                // Crouch/duck
+		                player.height = 20;
+		            } else {
+		                player.height = 40;
+		            }
+		            
+		            if (keys.shift) {
+		                shoot(player, 'player1');
+		            }
+		        } else {
+		            if (keys.left) {
+		                player.vx = -moveSpeed;
+		                player.facing = -1;
+		                player.animFrame += 0.2;
+		            } else if (keys.right) {
+		                player.vx = moveSpeed;
+		                player.facing = 1;
+		                player.animFrame += 0.2;
+		            } else {
+		                player.vx *= 0.8;
+		            }
+		            
+		            if (keys.up && player.onGround) {
+		                player.vy = -jumpPower;
+		                player.onGround = false;
+		            }
+		            
+		            if (keys.down && player.onGround) {
+		                // Crouch/duck
+		                player.height = 20;
+		            } else {
+		                player.height = 40;
+		            }
+		            
+		            if (keys.enter) {
+		                shoot(player, 'player2');
+		            }
+		        }
+		        
+		        // Update position
+		        player.x += player.vx;
+		        player.y += player.vy;
+		        
+		        // Platform collisions
+		        player.onGround = false;
+		        for (let platform of map) {
+		            if (player.x < platform.x + platform.width &&
+		                player.x + player.width > platform.x &&
+		                player.y < platform.y + platform.height &&
+		                player.y + player.height > platform.y) {
+		                
+		                // Landing on top
+		                if (player.vy > 0 && player.y < platform.y) {
+		                    player.y = platform.y - player.height;
+		                    player.vy = 0;
+		                    player.onGround = true;
+		                }
+		                // Hitting from below
+		                else if (player.vy < 0 && player.y > platform.y) {
+		                    player.y = platform.y + platform.height;
+		                    player.vy = 0;
+		                }
+		                // Side collisions
+		                else if (player.vx > 0 && player.x < platform.x) {
+		                    player.x = platform.x - player.width;
+		                    player.vx = 0;
+		                } else if (player.vx < 0 && player.x > platform.x) {
+		                    player.x = platform.x + platform.width;
+		                    player.vx = 0;
+		                }
+		            }
+		        }
+		        
+		        // Screen boundaries
+		        player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+		        if (player.y > canvas.height) {
+		            // Fall death
+		            damagePlayer(player, 50);
+		            respawnPlayer(player);
+		        }
+		    }
+		    
+		    function shoot(player, owner) {
+		        let currentTime = Date.now();
+		        let weapon = weapons[player.weapon];
+		        
+		        if (currentTime - player.lastShot < weapon.fireRate) return;
+		        if (player.ammo <= 0) {
+		            // Auto reload
+		            if (player.reloadTime === 0) {
+		                player.reloadTime = player.maxReloadTime;
+		            }
+		            return;
+		        }
+		        
+		        player.lastShot = currentTime;
+		        player.ammo--;
+		        player.muzzleFlash = 1;
+		        
+		        // Calculate bullet spawn position
+		        let bulletX = player.x + player.width/2 + player.facing * 20;
+		        let bulletY = player.y + player.height/2;
+		        
+		        // Determine target direction
+		        let targetX, targetY;
+		        if (player === player1) {
+		            targetX = player2.x + player2.width/2;
+		            targetY = player2.y + player2.height/2;
+		        } else {
+		            targetX = player1.x + player1.width/2;
+		            targetY = player1.y + player1.height/2;
+		        }
+		        
+		        let dx = targetX - bulletX;
+		        let dy = targetY - bulletY;
+		        let distance = Math.sqrt(dx * dx + dy * dy);
+		        let angle = Math.atan2(dy, dx);
+		        
+		        // Create bullets (multiple for shotgun)
+		        let pellets = weapon.pellets || 1;
+		        for (let i = 0; i < pellets; i++) {
+		            let spreadAngle = angle + (Math.random() - 0.5) * weapon.spread;
+		            
+		            bullets.push({
+		                x: bulletX,
+		                y: bulletY,
+		                vx: Math.cos(spreadAngle) * weapon.bulletSpeed,
+		                vy: Math.sin(spreadAngle) * weapon.bulletSpeed,
+		                damage: weapon.damage,
+		                life: 180, // 3 seconds
+		                owner: owner,
+		                explosive: weapon.explosive || false,
+		                color: weapon.color
+		            });
+		        }
+		        
+		        // Muzzle flash particles
+		        for (let i = 0; i < 8; i++) {
+		            particles.push({
+		                x: bulletX,
+		                y: bulletY,
+		                vx: Math.cos(angle + (Math.random() - 0.5) * 0.5) * (3 + Math.random() * 5),
+		                vy: Math.sin(angle + (Math.random() - 0.5) * 0.5) * (3 + Math.random() * 5),
+		                life: 15,
+		                size: 2 + Math.random() * 3,
+		                color: '#FFD700'
+		            });
+		        }
+		    }
+		    
+		    function checkBulletPlayerCollision(bullet, player) {
+		        return bullet.x >= player.x && bullet.x <= player.x + player.width &&
+		               bullet.y >= player.y && bullet.y <= player.y + player.height;
+		    }
+		    
+		    function checkPlayerPowerUpCollision(player, powerUp) {
+		        return player.x < powerUp.x + 20 &&
+		               player.x + player.width > powerUp.x &&
+		               player.y < powerUp.y + 20 &&
+		               player.y + player.height > powerUp.y;
+		    }
+		    
+		    function damagePlayer(player, damage, fromExplosion = false) {
+		        player.health -= damage;
+		        player.hitEffect = 1;
+		        
+		        // Blood particles
+		        for (let i = 0; i < 10; i++) {
+		            particles.push({
+		                x: player.x + player.width/2,
+		                y: player.y + player.height/2,
+		                vx: (Math.random() - 0.5) * 8,
+		                vy: -Math.random() * 6,
+		                life: 60,
+		                size: 2 + Math.random() * 3,
+		                color: '#8B0000'
+		            });
+		        }
+		        
+		        if (player.health <= 0) {
+		            player.health = 0;
+		            // Only create death explosion if not already from an explosion
+		            if (!fromExplosion) {
+		                createExplosion(player.x + player.width/2, player.y + player.height/2, 40);
+		            }
+		        }
+		    }
+		    
+		    function createExplosion(x, y, radius) {
+		        explosions.push({
+		            x: x,
+		            y: y,
+		            radius: 0,
+		            maxRadius: radius,
+		            expandSpeed: 3,
+		            life: 30,
+		            maxLife: 30,
