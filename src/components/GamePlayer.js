@@ -11,7 +11,29 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
       'right': 'ArrowRight'
     };
     
-    window.dispatchEvent(new KeyboardEvent(type, { key: keyMap[direction] }));
+    const key = keyMap[direction];
+    
+    // Create proper keyboard event with all necessary properties
+    const keyboardEvent = new KeyboardEvent(type, { 
+      key: key,
+      code: key,
+      keyCode: key === 'ArrowUp' ? 38 : key === 'ArrowDown' ? 40 : key === 'ArrowLeft' ? 37 : 39,
+      which: key === 'ArrowUp' ? 38 : key === 'ArrowDown' ? 40 : key === 'ArrowLeft' ? 37 : 39,
+      bubbles: true,
+      cancelable: true
+    });
+    
+    console.log(`Dispatching ${type} for direction: ${direction} (key: ${key})`);
+    
+    // Dispatch to both document and canvas
+    document.dispatchEvent(keyboardEvent);
+    const canvas = document.querySelector('#gameCanvas');
+    if (canvas) {
+      canvas.dispatchEvent(keyboardEvent);
+    }
+    
+    // Also try the legacy way
+    window.dispatchEvent(keyboardEvent);
   };
   
   const buttonStyle = {
@@ -55,6 +77,8 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
         }}
         onTouchStart={(e) => {
           e.preventDefault();
+          e.stopPropagation();
+          console.log('D-pad up touched');
           setPressedButtons(prev => new Set(prev).add('up'));
           handleDirectionPress('up');
           navigator.vibrate && navigator.vibrate(30);
@@ -209,7 +233,7 @@ const ActionButton = ({ action, pressedButtons, setPressedButtons }) => {
       'jump': ' ',
       'fire': ' ',
       'rotate': ' ',
-      'restart': 'Enter',
+      'restart': 'r',
       'start': ' ',
       'accelerate': 'ArrowUp',
       'brake': 'ArrowDown',
@@ -219,14 +243,35 @@ const ActionButton = ({ action, pressedButtons, setPressedButtons }) => {
     };
     
     const key = keyMap[action] || ' ';
-    window.dispatchEvent(new KeyboardEvent(type, { key }));
+    
+    // Create proper keyboard event with all necessary properties
+    const keyboardEvent = new KeyboardEvent(type, { 
+      key: key,
+      code: key === ' ' ? 'Space' : key === 'r' ? 'KeyR' : key,
+      keyCode: key === ' ' ? 32 : key === 'r' ? 82 : key.charCodeAt(0),
+      which: key === ' ' ? 32 : key === 'r' ? 82 : key.charCodeAt(0),
+      bubbles: true,
+      cancelable: true
+    });
+    
+    console.log(`Dispatching ${type} for key: ${key} (action: ${action})`);
+    
+    // Dispatch to both document and canvas
+    document.dispatchEvent(keyboardEvent);
+    const canvas = document.querySelector('#gameCanvas');
+    if (canvas) {
+      canvas.dispatchEvent(keyboardEvent);
+    }
+    
+    // Also try the legacy way
+    window.dispatchEvent(keyboardEvent);
   };
   
   const actionLabels = {
     'jump': '🦘',
     'fire': '🔫',
     'rotate': '🔄',
-    'restart': '🔄',
+    'restart': 'R',
     'start': '▶️',
     'accelerate': '⚡',
     'brake': '🛑',
@@ -266,6 +311,8 @@ const ActionButton = ({ action, pressedButtons, setPressedButtons }) => {
       }}
       onTouchStart={(e) => {
         e.preventDefault();
+        e.stopPropagation();
+        console.log('Action button touched:', action);
         if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(action));
         handleActionPress();
         navigator.vibrate && navigator.vibrate(30);
@@ -300,7 +347,7 @@ const ActionButton = ({ action, pressedButtons, setPressedButtons }) => {
 const GamePlayer = ({ gameId, gameData }) => {
   const canvasRef = useRef(null);
   const touchStartRef = useRef(null);
-  const [showControls, setShowControls] = useState(false);
+  const [showControls, setShowControls] = useState(true); // Force show for debugging
   const [pressedButtons, setPressedButtons] = useState(new Set());
   const [controlPositions, setControlPositions] = useState({
     leftMargin: '15px',
@@ -350,8 +397,20 @@ const GamePlayer = ({ gameId, gameData }) => {
     const setupCanvas = () => {
       const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
                     ('ontouchstart' in window) || 
-                    (window.innerWidth <= 768);
-      setShowControls(mobile);
+                    (window.innerWidth <= 768) ||
+                    ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0);
+      
+      console.log('Mobile detection:', {
+        userAgent: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+        ontouchstart: ('ontouchstart' in window),
+        screenWidth: window.innerWidth,
+        widthCheck: window.innerWidth <= 768,
+        touchPoints: navigator.maxTouchPoints,
+        finalMobile: mobile
+      });
+      
+      // Force show controls for debugging mobile issues
+      setShowControls(true); // Always show for debugging
       
       // Calculate optimal control positioning to avoid core gameplay area
       const calculateControlPositions = () => {
@@ -680,7 +739,7 @@ const GamePlayer = ({ gameId, gameData }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          pointerEvents: 'auto',
+          pointerEvents: 'none',
           zIndex: 1000,
           touchAction: 'none'
         }}>
@@ -789,31 +848,110 @@ const GamePlayer = ({ gameId, gameData }) => {
           
           {/* Paddle Game Controls */}
           {controlType === 'paddle' && (
-            <div className="paddle-hint" style={{
-              position: 'absolute',
-              bottom: controlPositions.bottomMargin,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              background: 'rgba(0,0,0,0.6)',
-              padding: '8px 12px',
-              borderRadius: '5px',
-              fontSize: '12px'
-            }}>
-              {gameId === 'pong' ? 'Tap top/bottom half to move paddle' : 'Swipe left/right to move paddle'}
-            </div>
+            <>
+              {gameId === 'pong' ? (
+                // Pong needs up/down controls
+                <div className="pong-controls" style={{
+                  position: 'absolute',
+                  right: controlPositions.rightMargin,
+                  bottom: controlPositions.bottomMargin,
+                  pointerEvents: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px'
+                }}>
+                  <ActionButton action="accelerate" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                  <ActionButton action="brake" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                </div>
+              ) : (
+                // Breakout needs left/right controls
+                <div className="breakout-controls" style={{
+                  position: 'absolute',
+                  bottom: controlPositions.bottomMargin,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  pointerEvents: 'auto',
+                  display: 'flex',
+                  gap: '10px'
+                }}>
+                  <button 
+                    style={{
+                      width: '50px',
+                      height: '40px',
+                      background: 'rgba(246, 128, 29, 0.65)',
+                      border: '1px solid rgba(61, 42, 26, 0.8)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      touchAction: 'manipulation'
+                    }}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', keyCode: 37, which: 37, bubbles: true });
+                      document.dispatchEvent(event);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      const event = new KeyboardEvent('keyup', { key: 'ArrowLeft', keyCode: 37, which: 37, bubbles: true });
+                      document.dispatchEvent(event);
+                    }}
+                  >←</button>
+                  <button 
+                    style={{
+                      width: '50px',
+                      height: '40px',
+                      background: 'rgba(246, 128, 29, 0.65)',
+                      border: '1px solid rgba(61, 42, 26, 0.8)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      touchAction: 'manipulation'
+                    }}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      const event = new KeyboardEvent('keydown', { key: 'ArrowRight', keyCode: 39, which: 39, bubbles: true });
+                      document.dispatchEvent(event);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      const event = new KeyboardEvent('keyup', { key: 'ArrowRight', keyCode: 39, which: 39, bubbles: true });
+                      document.dispatchEvent(event);
+                    }}
+                  >→</button>
+                </div>
+              )}
+              <div className="paddle-hint" style={{
+                position: 'absolute',
+                bottom: controlPositions.bottomMargin,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'white',
+                background: 'rgba(0,0,0,0.6)',
+                padding: '6px 10px',
+                borderRadius: '5px',
+                fontSize: '10px'
+              }}>
+                {gameId === 'pong' ? 'Use ⚡🛑 to move paddle up/down' : 'Use ←→ to move paddle'}
+              </div>
+            </>
           )}
           
           {/* Tap Game Controls */}
           {controlType === 'tap' && (
             <>
-              <div className="tap-action" style={{
+              <div className="tap-actions" style={{
                 position: 'absolute',
                 right: controlPositions.rightMargin,
                 bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px'
               }}>
                 <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <ActionButton action="restart" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
               <div className="tap-hint" style={{
                 position: 'absolute',
@@ -826,26 +964,48 @@ const GamePlayer = ({ gameId, gameData }) => {
                 borderRadius: '5px',
                 fontSize: '10px'
               }}>
-                Tap ▶️ or screen to play
+                Tap ▶️ to start, R to restart
               </div>
             </>
           )}
           
           {/* Runner Game Controls */}
           {controlType === 'runner' && (
-            <div className="runner-hint" style={{
-              position: 'absolute',
-              bottom: controlPositions.bottomMargin,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              background: 'rgba(0,0,0,0.6)',
-              padding: '8px 12px',
-              borderRadius: '5px',
-              fontSize: '12px'
-            }}>
-              Swipe left/right/up/down to dodge
-            </div>
+            <>
+              <div className="runner-dpad" style={{
+                position: 'absolute',
+                left: controlPositions.leftMargin,
+                bottom: controlPositions.bottomMargin,
+                pointerEvents: 'auto'
+              }}>
+                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              </div>
+              <div className="runner-actions" style={{
+                position: 'absolute',
+                right: controlPositions.rightMargin,
+                bottom: controlPositions.bottomMargin,
+                pointerEvents: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px'
+              }}>
+                <ActionButton action="jump" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              </div>
+              <div className="runner-hint" style={{
+                position: 'absolute',
+                bottom: controlPositions.bottomMargin,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'white',
+                background: 'rgba(0,0,0,0.6)',
+                padding: '6px 10px',
+                borderRadius: '5px',
+                fontSize: '10px'
+              }}>
+                Use D-pad to move, 🦘 to jump
+              </div>
+            </>
           )}
           
           {/* Combat Game Controls */}
@@ -881,19 +1041,29 @@ const GamePlayer = ({ gameId, gameData }) => {
           
           {/* Continuous Movement (like Slither) */}
           {controlType === 'continuous' && (
-            <div className="continuous-hint" style={{
-              position: 'absolute',
-              bottom: controlPositions.bottomMargin,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              background: 'rgba(0,0,0,0.6)',
-              padding: '8px 12px',
-              borderRadius: '5px',
-              fontSize: '12px'
-            }}>
-              Touch and drag to steer
-            </div>
+            <>
+              <div className="continuous-dpad" style={{
+                position: 'absolute',
+                left: controlPositions.leftMargin,
+                bottom: controlPositions.bottomMargin,
+                pointerEvents: 'auto'
+              }}>
+                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              </div>
+              <div className="continuous-hint" style={{
+                position: 'absolute',
+                bottom: controlPositions.bottomMargin,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'white',
+                background: 'rgba(0,0,0,0.6)',
+                padding: '6px 10px',
+                borderRadius: '5px',
+                fontSize: '10px'
+              }}>
+                Use D-pad or touch screen to steer
+              </div>
+            </>
           )}
         </div>
       )}
