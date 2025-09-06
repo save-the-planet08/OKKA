@@ -706,60 +706,65 @@ body {
     }
 }
 
-/* iPhone 11 (414px) and iPhone SE (375px/320px) - KOMPLETT NEU */
+/* iPhone 11 (414px) and iPhone SE (375px/320px) - PROZENTUAL */
 @media (max-width: 414px) and (pointer: coarse) {
-    body {
-        font-size: 14px; /* Alles kleiner */
-    }
-    
     .container {
-        padding: 5px;
-        transform: scale(0.9); /* Alles 10% kleiner */
-        transform-origin: top center;
+        padding: 2%;
+        width: 100%;
     }
     
     .header {
-        padding: 10px;
-        min-height: auto;
+        padding: 3%;
+        min-height: 15vh;
     }
     
     .logo h1 {
-        font-size: 2em;
+        font-size: 6vw;
     }
     
     .logo-image {
-        width: 60px;
-        height: 60px;
+        width: 15vw;
+        height: 15vw;
     }
     
-    /* SINGLE COLUMN - Keine Ads */
+    /* PROZENTUALE 3-SPALTEN LAYOUT */
     .main-content {
         display: flex;
-        flex-direction: column;
-        gap: 10px;
+        flex-direction: row;
+        gap: 1%;
         padding: 0;
+        height: auto;
     }
     
     .ad-left, .ad-right {
-        display: none !important;
+        width: 12%;
+        position: static;
+        flex-shrink: 0;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 30vh;
+        font-size: 2vw;
+        padding: 2%;
+        border-radius: 2vw;
     }
     
     .game-area {
-        flex: 1;
-        padding: 10px;
+        width: 74%;
+        flex: none;
+        padding: 3%;
         margin: 0;
-        width: 100%;
     }
     
     .games-grid {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 3%;
         padding: 0;
     }
     
     .game-card {
-        min-height: 120px;
-        padding: 15px;
+        min-height: 20vh;
+        padding: 4%;
     }
     
     .game-area {
