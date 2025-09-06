@@ -313,6 +313,8 @@ const GamePlayer = ({ gameId, gameData }) => {
           canvas.style.top = '0';
           canvas.style.left = '0';
           canvas.style.background = '#000';
+          canvas.style.touchAction = 'none'; // Verhindert Scroll
+          canvas.style.pointerEvents = 'auto'; // Touch erlauben
           
           // Body für Vollbild markieren
           document.body.classList.add('game-active');
@@ -353,6 +355,7 @@ const GamePlayer = ({ gameId, gameData }) => {
       // Add touch support
       const handleTouchStart = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
         touchStartRef.current = {
@@ -605,8 +608,9 @@ const GamePlayer = ({ gameId, gameData }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          pointerEvents: 'none',
-          zIndex: 1000
+          pointerEvents: 'auto',
+          zIndex: 1000,
+          touchAction: 'none'
         }}>
           
           {/* Directional Controls */}
