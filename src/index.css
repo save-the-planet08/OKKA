@@ -459,6 +459,8 @@ body {
 #gameCanvas {
     border-radius: calc(var(--border-radius) - 4px);
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    max-width: 100%;
+    height: auto;
 }
 
 /* Footer im Comic-Style */
@@ -520,6 +522,24 @@ body {
         padding: 10px;
     }
     
+    /* Mobile Game Display Optimization */
+    .game-area {
+        padding: 10px;
+        margin: 0;
+    }
+    
+    .game-frame {
+        min-height: 50vh;
+        padding: 10px;
+    }
+    
+    #gameCanvas {
+        width: 100% !important;
+        height: auto !important;
+        max-width: calc(100vw - 40px);
+        max-height: calc(100vh - 300px);
+    }
+    
     .header {
         padding: 25px;
         min-height: 120px;
@@ -573,6 +593,31 @@ body {
 @media (max-width: 480px) {
     .games-grid {
         grid-template-columns: 1fr;
+    }
+    
+    /* Ultra-mobile game optimization */
+    .game-area {
+        padding: 5px;
+    }
+    
+    .game-header {
+        margin-bottom: 10px;
+    }
+    
+    #gameCanvas {
+        max-width: calc(100vw - 20px);
+        max-height: calc(100vh - 200px);
+    }
+    
+    /* Mobile controls spacing */
+    .mobile-controls .d-pad {
+        left: 10px !important;
+        bottom: 10px !important;
+    }
+    
+    .mobile-controls .action-buttons {
+        right: 10px !important;
+        bottom: 10px !important;
     }
     
     .logo h1 {

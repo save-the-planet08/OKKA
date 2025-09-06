@@ -12,6 +12,23 @@ const App = () => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
+  // Hash routing for direct game access
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && games[hash]) {
+        handleGameClick(hash);
+      } else if (!hash) {
+        setCurrentView('home');
+        setCurrentGame(null);
+      }
+    };
+    
+    handleHashChange(); // Check initial hash
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };

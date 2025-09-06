@@ -296,6 +296,25 @@ const GamePlayer = ({ gameId, gameData }) => {
                     ('ontouchstart' in window) || 
                     (window.innerWidth <= 768);
       setShowControls(mobile);
+      
+      // Adjust canvas size for mobile
+      if (canvasRef.current && mobile) {
+        const canvas = canvasRef.current;
+        const maxWidth = Math.min(window.innerWidth - 40, 800);
+        const maxHeight = Math.min(window.innerHeight - 200, 600);
+        
+        // Maintain aspect ratio (4:3)
+        let width = maxWidth;
+        let height = (width * 3) / 4;
+        
+        if (height > maxHeight) {
+          height = maxHeight;
+          width = (height * 4) / 3;
+        }
+        
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+      }
     };
     
     checkMobile();
