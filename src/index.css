@@ -712,6 +712,13 @@ body {
         height: 100vh;
         display: flex;
         flex-direction: column;
+        margin: 0;
+    }
+    
+    .header {
+        margin-bottom: 0;
+        border-radius: 0;
+        padding: 15px;
     }
     
     .games-grid {
@@ -720,7 +727,7 @@ body {
         padding: 0 15px;
     }
     
-    /* STARTSEITE - Clean layout without overlapping */
+    /* MOBILE - Single column layout, no rails */
     .main-content {
         flex-direction: column;
         gap: 0;
@@ -728,59 +735,41 @@ body {
         position: static;
         padding: 0;
         height: 100%;
+        flex: 1;
     }
     
-    /* Show ads as full-width blocks on mobile */
+    /* Hide rails completely on mobile - no placeholders */
     .ad-left, .ad-right {
-        width: 100%;
-        height: 60px;
-        position: static;
-        background: var(--okka-orange);
-        border-radius: 8px;
-        flex-shrink: 0;
-        margin: 0;
+        display: none !important;
     }
     
-    .ad-placeholder.vertical {
-        height: 60px;
-        font-size: 0.8em;
-        padding: 10px;
-        background: var(--okka-orange);
-        color: white;
-        border: 2px solid var(--okka-border);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        writing-mode: horizontal-tb;
-        text-orientation: mixed;
-        font-weight: bold;
-        width: 100%;
-    }
-    
-    /* GAME AREA - Clean homepage display, fullscreen for games */
+    /* GAME AREA - Full width main column */
     .game-area {
         flex: 1;
         min-width: 0;
         margin: 0;
-        padding: 0;
+        padding: 15px;
         border-radius: 0;
         box-shadow: none;
         border: none;
         background: var(--okka-surface);
+        width: 100%;
     }
     
     body.game-active .game-area {
         position: fixed !important;
-        top: 50px !important;
+        top: 0 !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        background: #000;
-        border: none;
-        border-radius: 0;
+        background: #000 !important;
+        border: none !important;
+        border-radius: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
         z-index: 1000;
+        width: 100vw !important;
+        height: 100vh !important;
     }
     
     .game-area {
@@ -827,7 +816,7 @@ body {
         object-fit: cover !important;
         background: #000;
         position: absolute;
-        top: 0;
+        top: 50px !important;
         left: 0;
         z-index: 999;
     }
