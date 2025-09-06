@@ -706,8 +706,8 @@ body {
     }
 }
 
-/* iPhone 11/SE - Same as iPad but smaller */
-@media (max-width: 480px) and (pointer: coarse) {
+/* iPhone 11 (414px) and iPhone SE (375px/320px) - Same as iPad */
+@media (max-width: 414px) and (pointer: coarse) {
     .container {
         padding: 10px;
     }
