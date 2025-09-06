@@ -740,89 +740,52 @@ body {
 }
 
 @media (max-width: 480px) and (pointer: coarse) {
-    body {
-        height: auto;
-        min-height: 100vh;
-    }
-    
     .container {
-        padding: 0;
-        max-width: 100%;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        margin: 0;
-    }
-    
-    .header {
-        margin-bottom: 0;
-        border-radius: 0;
-        padding: 15px;
-        flex-shrink: 0;
+        padding: 5px;
     }
     
     .games-grid {
         grid-template-columns: 1fr;
         gap: 15px;
-        padding: 0 15px;
     }
     
-    /* MOBILE - Single column layout, no rails */
+    /* STARTSEITE - Normal scrollbar mit Werbung */
     .main-content {
-        flex-direction: column;
-        gap: 0;
-        align-items: stretch;
+        flex-direction: row;
+        gap: 3px;
+        align-items: flex-start;
         position: static;
-        padding: 0;
-        flex: 1;
-        min-height: 0;
     }
     
-    /* Hide rails completely on mobile - no placeholders */
     .ad-left, .ad-right {
-        display: none !important;
+        width: 45px;
+        position: static;
+        background: var(--okka-orange);
+        border-radius: 8px;
+        flex-shrink: 0;
     }
     
-    /* GAME AREA - Full width main column, normal scrolling */
+    .ad-placeholder.vertical {
+        height: 300px;
+        font-size: 0.6em;
+        padding: 5px 2px;
+        background: var(--okka-orange);
+        color: white;
+        border: 2px solid var(--okka-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        font-weight: bold;
+    }
+    
+    /* GAME AREA - Normal auf Startseite, Vollbild nur beim Spiel */
     .game-area {
         flex: 1;
         min-width: 0;
         margin: 0;
         padding: 15px;
-        border-radius: 0;
-        box-shadow: none;
-        border: none;
-        background: var(--okka-surface);
-        width: 100%;
-        min-height: 0;
-    }
-    
-    /* GAME MODE - Only for game display */
-    body.game-active {
-        height: 100vh !important;
-        overflow: hidden !important;
-    }
-    
-    body.game-active .container {
-        height: 100vh !important;
-    }
-    
-    body.game-active .main-content {
-        height: 100% !important;
-    }
-    
-    body.game-active .game-area {
-        flex: 1 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
-        border-radius: 0 !important;
-        background: #000 !important;
-        width: 100% !important;
-        height: auto !important;
-        position: static !important;
-        display: flex !important;
-        flex-direction: column !important;
     }
     
     .game-area {
