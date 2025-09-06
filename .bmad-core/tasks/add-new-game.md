@@ -28,7 +28,8 @@ Streamlined implementation of new games to the OKKA gaming platform with automat
 - [ ] Game over detection and restart functionality
 
 **User Experience Standards:**
-- [ ] Intuitive controls (keyboard and/or mouse)
+- [ ] Intuitive controls (keyboard/mouse AND mobile touch)
+- [ ] Mobile-first design with swipe/tap interactions
 - [ ] Clear visual feedback
 - [ ] Proper collision detection
 - [ ] Balanced difficulty progression (start easy, scale gradually)
@@ -182,8 +183,11 @@ const gameInitializers = {
 
 **Mobile Compatibility:**
 - [ ] Touch controls work (automatically handled by GamePlayer)
+- [ ] Game designed mobile-first with swipe/tap interactions
 - [ ] Game scales properly on mobile screens  
 - [ ] UI elements are readable on small screens
+- [ ] No complex multi-key combinations required
+- [ ] All controls accessible with thumbs
 
 **User Experience:**
 - [ ] Game is fun and engaging from the first play
