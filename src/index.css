@@ -706,24 +706,55 @@ body {
 }
 
 @media (max-width: 480px) and (pointer: coarse) {
+    .container {
+        padding: 0;
+        max-width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
     .games-grid {
         grid-template-columns: 1fr;
         gap: 15px;
-        padding: 0 10px;
+        padding: 0 15px;
     }
     
     /* STARTSEITE - Clean layout without overlapping */
     .main-content {
         flex-direction: column;
-        gap: 15px;
+        gap: 0;
         align-items: stretch;
         position: static;
-        padding: 10px;
+        padding: 0;
+        height: 100%;
     }
     
-    /* Hide ads on very small screens to prevent overlap */
+    /* Show ads as full-width blocks on mobile */
     .ad-left, .ad-right {
-        display: none;
+        width: 100%;
+        height: 60px;
+        position: static;
+        background: var(--okka-orange);
+        border-radius: 8px;
+        flex-shrink: 0;
+        margin: 0;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 60px;
+        font-size: 0.8em;
+        padding: 10px;
+        background: var(--okka-orange);
+        color: white;
+        border: 2px solid var(--okka-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        writing-mode: horizontal-tb;
+        text-orientation: mixed;
+        font-weight: bold;
+        width: 100%;
     }
     
     /* GAME AREA - Clean homepage display, fullscreen for games */
@@ -731,9 +762,11 @@ body {
         flex: 1;
         min-width: 0;
         margin: 0;
-        padding: 20px 15px;
-        border-radius: 12px;
-        box-shadow: var(--comic-shadow);
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        background: var(--okka-surface);
     }
     
     body.game-active .game-area {
@@ -745,7 +778,8 @@ body {
         background: #000;
         border: none;
         border-radius: 0;
-        padding: 0;
+        padding: 0 !important;
+        margin: 0 !important;
         z-index: 1000;
     }
     
@@ -777,10 +811,12 @@ body {
         width: 100% !important;
         height: 100% !important;
         background: #000;
-        border: none;
-        padding: 0;
-        margin: 0;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
         position: relative;
+        border-radius: 0 !important;
+        box-shadow: none !important;
     }
     
     body.game-active #gameCanvas {
