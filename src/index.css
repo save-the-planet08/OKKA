@@ -706,65 +706,10 @@ body {
     }
 }
 
-/* iPhone 11 (414px) and iPhone SE (375px/320px) - PROZENTUAL */
+/* iPhone = iPad - KEINE SONDERFÄLLE MEHR */
 @media (max-width: 414px) and (pointer: coarse) {
-    .container {
-        padding: 2%;
-        width: 100%;
-    }
-    
-    .header {
-        padding: 3%;
-        min-height: 15vh;
-    }
-    
-    .logo h1 {
-        font-size: 6vw;
-    }
-    
-    .logo-image {
-        width: 15vw;
-        height: 15vw;
-    }
-    
-    /* PROZENTUALE 3-SPALTEN LAYOUT */
-    .main-content {
-        display: flex;
-        flex-direction: row;
-        gap: 1%;
-        padding: 0;
-        height: auto;
-    }
-    
-    .ad-left, .ad-right {
-        width: 12%;
-        position: static;
-        flex-shrink: 0;
-    }
-    
-    .ad-placeholder.vertical {
-        height: 30vh;
-        font-size: 2vw;
-        padding: 2%;
-        border-radius: 2vw;
-    }
-    
-    .game-area {
-        width: 74%;
-        flex: none;
-        padding: 3%;
-        margin: 0;
-    }
-    
     .games-grid {
         grid-template-columns: 1fr;
-        gap: 3%;
-        padding: 0;
-    }
-    
-    .game-card {
-        min-height: 20vh;
-        padding: 4%;
     }
     
     .game-area {
