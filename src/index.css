@@ -463,11 +463,39 @@ body {
     height: auto;
 }
 
-/* Desktop game canvas - keep normal */
-@media (min-width: 769px) {
+/* Desktop - Normales Layout mit Werbung */
+@media (min-width: 1025px) {
+    .main-content {
+        display: flex;
+        flex-direction: row;
+        gap: 25px;
+        align-items: flex-start;
+    }
+    
+    .ad-left, .ad-right {
+        width: 160px;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 600px;
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+    }
+    
     #gameCanvas {
         width: 800px !important;
         height: 600px !important;
+    }
+    
+    .game-area {
+        position: static;
+        background: var(--okka-surface);
+        border: 4px solid var(--okka-border);
+        border-radius: var(--border-radius);
+        padding: 30px;
+        box-shadow: var(--comic-shadow);
     }
 }
 
@@ -505,23 +533,33 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+    /* SYMMETRISCHE LAYOUT - Werbung bleibt auf beiden Seiten */
     .main-content {
-        flex-direction: column;
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+        align-items: flex-start;
     }
     
     .ad-left, .ad-right {
-        width: 100%;
-        position: static;
-        order: 3;
+        width: 120px;
+        position: sticky;
+        top: 20px;
+        flex-shrink: 0;
     }
     
     .ad-placeholder.vertical {
-        height: 100px;
-        writing-mode: initial;
+        height: 400px;
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .game-area {
-        order: 1;
+        flex: 1;
+        min-width: 0;
     }
 }
 
@@ -530,35 +568,62 @@ body {
         padding: 5px;
     }
     
-    /* FULL SCREEN Mobile Game Experience */
+    /* STARTSEITE - Symmetrische Werbung auch auf Tablet */
+    .main-content {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    .ad-left, .ad-right {
+        width: 80px;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 300px;
+        font-size: 0.8em;
+        padding: 10px 5px;
+    }
+    
+    /* VOLLBILD SPIEL - Gesamter Screen sichtbar */
     .game-area {
         padding: 0;
         margin: 0;
-        background: var(--okka-surface);
+        background: #000;
         border: none;
         border-radius: 0;
         box-shadow: none;
-        min-height: calc(100vh - 60px);
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
     }
     
     .game-frame {
         background: #000;
         border: none;
         border-radius: 0;
-        min-height: calc(100vh - 120px);
+        width: 100%;
+        height: 100%;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: none;
+        position: relative;
     }
     
     #gameCanvas {
-        width: 100vw !important;
-        height: calc(100vh - 120px) !important;
-        max-width: none !important;
-        max-height: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100vw !important;
+        max-height: calc(100vh - 60px) !important;
         object-fit: contain;
+        background: #000;
     }
     
     .game-header {
@@ -566,13 +631,15 @@ body {
         top: 0;
         left: 0;
         right: 0;
+        height: 60px;
         z-index: 1001;
         background: var(--okka-surface);
         padding: 10px;
         margin: 0;
         border-bottom: 2px solid var(--okka-border);
-        flex-direction: row;
-        gap: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     
     .header {
@@ -630,54 +697,110 @@ body {
         grid-template-columns: 1fr;
     }
     
-    /* ANGRY BIRDS STYLE - Full screen mobile gaming */
-    body {
-        overflow: hidden;
+    /* STARTSEITE - Normal scrollbar mit Werbung */
+    .main-content {
+        flex-direction: row;
+        gap: 3px;
+        align-items: flex-start;
+        position: static; /* NICHT fixed */
     }
     
+    .ad-left, .ad-right {
+        width: 45px;
+        position: static;
+        background: var(--okka-orange);
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 300px;
+        font-size: 0.6em;
+        padding: 5px 2px;
+        background: var(--okka-orange);
+        color: white;
+        border: 2px solid var(--okka-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        font-weight: bold;
+    }
+    
+    /* GAME AREA - Normal auf Startseite, Vollbild nur beim Spiel */
     .game-area {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 0;
+        flex: 1;
+        min-width: 0;
         margin: 0;
+        padding: 15px;
+        /* Vollbild nur wenn Spiel aktiv */
+    }
+    
+    body.game-active .game-area {
+        position: fixed !important;
+        top: 50px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
         background: #000;
         border: none;
         border-radius: 0;
+        padding: 0;
+        z-index: 1000;
     }
     
-    .game-frame {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+    .game-area {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    /* VOLLBILD NUR FÜR SPIELE - Nicht für Startseite! */
+    body.game-active {
+        overflow: hidden;
+    }
+    
+    body.game-active .main-content {
+        display: none; /* Verstecke Startseite Layout */
+    }
+    
+    body.game-active .game-container {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 999 !important;
         background: #000;
+    }
+    
+    body.game-active .game-frame {
+        width: 100% !important;
+        height: 100% !important;
+        background: #000;
+        border: none;
         padding: 0;
         margin: 0;
-        border: none;
-        min-height: 100%;
+        position: relative;
     }
     
-    #gameCanvas {
+    body.game-active #gameCanvas {
+        width: 100vw !important;
+        height: calc(100vh - 50px) !important;
+        object-fit: contain;
+        background: #000;
         position: absolute;
         top: 0;
         left: 0;
-        width: 100vw !important;
-        height: calc(100vh - 60px) !important;
-        object-fit: contain;
-        background: #000;
     }
     
-    .game-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 60px;
-        z-index: 1002;
+    body.game-active .game-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 50px !important;
+        z-index: 1001 !important;
         background: var(--okka-surface);
         padding: 8px 15px;
         margin: 0;
@@ -687,45 +810,38 @@ body {
         justify-content: space-between;
     }
     
-    #current-game-title {
-        font-size: 1.2em;
+    body.game-active #current-game-title {
+        font-size: 1em;
     }
     
-    .back-button {
-        padding: 8px 15px;
-        font-size: 0.9em;
+    body.game-active .back-button {
+        padding: 6px 12px;
+        font-size: 0.8em;
     }
     
-    /* Mobile controls for full screen */
-    .mobile-controls {
+    /* Mobile controls nur im Spiel-Modus */
+    body.game-active .mobile-controls {
         position: fixed !important;
-        top: 60px !important;
+        top: 50px !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        z-index: 1001 !important;
+        z-index: 1002 !important;
         pointer-events: none !important;
     }
     
-    .mobile-controls .d-pad {
+    body.game-active .mobile-controls .d-pad {
         position: absolute !important;
         left: 15px !important;
         bottom: 15px !important;
-        z-index: 1002 !important;
+        z-index: 1003 !important;
     }
     
-    .mobile-controls .action-buttons {
+    body.game-active .mobile-controls .action-buttons {
         position: absolute !important;
         right: 15px !important;
         bottom: 15px !important;
-        z-index: 1002 !important;
-    }
-    
-    .mobile-controls .racing-controls,
-    .mobile-controls .combat-left,
-    .mobile-controls .combat-center,
-    .mobile-controls .combat-right {
-        z-index: 1002 !important;
+        z-index: 1003 !important;
     }
     
     .logo h1 {

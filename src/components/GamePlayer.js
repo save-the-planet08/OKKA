@@ -297,30 +297,38 @@ const GamePlayer = ({ gameId, gameData }) => {
                     (window.innerWidth <= 768);
       setShowControls(mobile);
       
-      // FULL SCREEN mobile canvas sizing like Angry Birds
+      // VOLLBILD - Gesamter Screen sichtbar
       if (canvasRef.current) {
         const canvas = canvasRef.current;
         
         if (mobile) {
-          // Full screen mobile experience
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight - 60; // Account for header
+          // Mobile - Kompletter Screen sichtbar
+          const headerHeight = window.innerWidth <= 480 ? 50 : 60;
+          canvas.width = 800; // Original game resolution
+          canvas.height = 600;
           canvas.style.width = '100vw';
-          canvas.style.height = 'calc(100vh - 60px)';
-          canvas.style.position = 'fixed';
-          canvas.style.top = '60px';
+          canvas.style.height = `calc(100vh - ${headerHeight}px)`;
+          canvas.style.objectFit = 'contain'; // KRITISCH - zeigt ganzes Spiel
+          canvas.style.position = 'absolute';
+          canvas.style.top = '0';
           canvas.style.left = '0';
-          canvas.style.zIndex = '1000';
+          canvas.style.background = '#000';
+          
+          // Body für Vollbild markieren
+          document.body.classList.add('game-active');
         } else {
-          // Desktop experience
+          // Desktop - Normales Layout
           canvas.width = 800;
           canvas.height = 600;
           canvas.style.width = '800px';
           canvas.style.height = '600px';
+          canvas.style.objectFit = 'initial';
           canvas.style.position = 'static';
           canvas.style.top = 'auto';
           canvas.style.left = 'auto';
-          canvas.style.zIndex = 'auto';
+          canvas.style.background = 'transparent';
+          
+          document.body.classList.remove('game-active');
         }
       }
     };
@@ -575,6 +583,8 @@ const GamePlayer = ({ gameId, gameData }) => {
         window.currentGameCleanup();
         window.currentGameCleanup = null;
       }
+      // Vollbild-Modus beenden
+      document.body.classList.remove('game-active');
     };
   }, [gameId]);
 
