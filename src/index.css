@@ -706,11 +706,49 @@ body {
     }
 }
 
+/* iPhone 11/SE - Same as iPad but smaller */
 @media (max-width: 480px) and (pointer: coarse) {
+    .container {
+        padding: 10px;
+    }
+    
+    /* IPHONE TOUCHSCREEN - Same as tablet layout */
+    .main-content {
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+        padding: 0 5px;
+    }
+    
+    .ad-left, .ad-right {
+        width: 50px;
+        position: sticky;
+        top: 20px;
+        flex-shrink: 0;
+    }
+    
+    .ad-placeholder.vertical {
+        height: 250px;
+        font-size: 0.6em;
+        padding: 6px 2px;
+        border-radius: 8px;
+    }
+    
     .games-grid {
         grid-template-columns: 1fr;
         gap: 15px;
         padding: 0 5px;
+    }
+    
+    /* GAME AREA - Same as iPad, NOT fixed position */
+    .game-area {
+        flex: 1;
+        min-width: 0;
+        padding: 15px;
+        background: var(--okka-surface);
+        border: 4px solid var(--okka-border);
+        border-radius: var(--border-radius);
+        box-shadow: var(--comic-shadow);
     }
     
     .game-area {
@@ -792,17 +830,39 @@ body {
     }
     
     body.game-active .game-header {
-        position: static !important;
-        height: 40px !important;
-        background: var(--okka-surface);
-        padding: 5px 10px;
-        margin: 0;
-        border-bottom: 1px solid var(--okka-border);
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        flex-shrink: 0;
-        font-size: 0.8em;
+        margin-bottom: 25px;
+        gap: 20px;
+        padding-bottom: 15px;
+        border-bottom: 3px dashed var(--okka-brown);
+    }
+    
+    body.game-active .game-area {
+        flex: 1 !important;
+        background: var(--okka-surface) !important;
+        border: 4px solid var(--okka-border) !important;
+        border-radius: var(--border-radius) !important;
+        padding: 15px !important;
+        box-shadow: var(--comic-shadow) !important;
+        position: static !important;
+    }
+    
+    body.game-active .game-frame {
+        background: var(--okka-border);
+        border: 4px solid var(--okka-border);
+        border-radius: var(--border-radius);
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    body.game-active #gameCanvas {
+        border-radius: calc(var(--border-radius) - 4px);
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        max-width: 100%;
+        height: auto;
     }
     
     body.game-active #current-game-title {
