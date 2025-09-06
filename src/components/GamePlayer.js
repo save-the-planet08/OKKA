@@ -297,23 +297,31 @@ const GamePlayer = ({ gameId, gameData }) => {
                     (window.innerWidth <= 768);
       setShowControls(mobile);
       
-      // Adjust canvas size for mobile
-      if (canvasRef.current && mobile) {
+      // FULL SCREEN mobile canvas sizing like Angry Birds
+      if (canvasRef.current) {
         const canvas = canvasRef.current;
-        const maxWidth = Math.min(window.innerWidth - 40, 800);
-        const maxHeight = Math.min(window.innerHeight - 200, 600);
         
-        // Maintain aspect ratio (4:3)
-        let width = maxWidth;
-        let height = (width * 3) / 4;
-        
-        if (height > maxHeight) {
-          height = maxHeight;
-          width = (height * 4) / 3;
+        if (mobile) {
+          // Full screen mobile experience
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight - 60; // Account for header
+          canvas.style.width = '100vw';
+          canvas.style.height = 'calc(100vh - 60px)';
+          canvas.style.position = 'fixed';
+          canvas.style.top = '60px';
+          canvas.style.left = '0';
+          canvas.style.zIndex = '1000';
+        } else {
+          // Desktop experience
+          canvas.width = 800;
+          canvas.height = 600;
+          canvas.style.width = '800px';
+          canvas.style.height = '600px';
+          canvas.style.position = 'static';
+          canvas.style.top = 'auto';
+          canvas.style.left = 'auto';
+          canvas.style.zIndex = 'auto';
         }
-        
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
       }
     };
     
@@ -575,8 +583,8 @@ const GamePlayer = ({ gameId, gameData }) => {
       <canvas 
         ref={canvasRef}
         id="gameCanvas" 
-        width="800" 
-        height="600"
+        width={showControls ? window.innerWidth : 800}
+        height={showControls ? (window.innerHeight - 60) : 600}
       />
       
       {/* Mobile Control Overlay */}
