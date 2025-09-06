@@ -706,10 +706,15 @@ body {
 }
 
 @media (max-width: 480px) and (pointer: coarse) {
+    body {
+        height: auto;
+        min-height: 100vh;
+    }
+    
     .container {
         padding: 0;
         max-width: 100%;
-        height: 100vh;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
         margin: 0;
@@ -719,6 +724,7 @@ body {
         margin-bottom: 0;
         border-radius: 0;
         padding: 15px;
+        flex-shrink: 0;
     }
     
     .games-grid {
@@ -734,8 +740,8 @@ body {
         align-items: stretch;
         position: static;
         padding: 0;
-        height: 100%;
         flex: 1;
+        min-height: 0;
     }
     
     /* Hide rails completely on mobile - no placeholders */
@@ -743,7 +749,7 @@ body {
         display: none !important;
     }
     
-    /* GAME AREA - Full width main column */
+    /* GAME AREA - Full width main column, normal scrolling */
     .game-area {
         flex: 1;
         min-width: 0;
@@ -754,6 +760,21 @@ body {
         border: none;
         background: var(--okka-surface);
         width: 100%;
+        min-height: 0;
+    }
+    
+    /* GAME MODE - Only for game display */
+    body.game-active {
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+    
+    body.game-active .container {
+        height: 100vh !important;
+    }
+    
+    body.game-active .main-content {
+        height: 100% !important;
     }
     
     body.game-active .game-area {
@@ -766,6 +787,8 @@ body {
         width: 100% !important;
         height: auto !important;
         position: static !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
     
     .game-area {
@@ -794,7 +817,7 @@ body {
     
     body.game-active .game-frame {
         width: 100% !important;
-        height: 100% !important;
+        flex: 1 !important;
         background: #000;
         border: none !important;
         padding: 0 !important;
@@ -802,6 +825,9 @@ body {
         position: relative;
         border-radius: 0 !important;
         box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
     body.game-active #gameCanvas {
