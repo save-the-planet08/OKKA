@@ -15,13 +15,13 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
   };
   
   const buttonStyle = {
-    width: '50px',
-    height: '50px',
-    background: 'rgba(246, 128, 29, 0.8)',
-    border: '3px solid #3D2A1A',
-    borderRadius: '12px',
+    width: '35px',
+    height: '35px',
+    background: 'rgba(246, 128, 29, 0.65)',
+    border: '1px solid rgba(61, 42, 26, 0.8)',
+    borderRadius: '8px',
     color: 'white',
-    fontSize: '20px',
+    fontSize: '14px',
     fontWeight: 'bold',
     cursor: 'pointer',
     display: 'flex',
@@ -29,7 +29,7 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
     justifyContent: 'center',
     userSelect: 'none',
     touchAction: 'manipulation',
-    boxShadow: '3px 3px 0px #3D2A1A',
+    boxShadow: '1px 1px 0px rgba(61, 42, 26, 0.6)',
     transition: 'all 0.1s ease'
   };
   
@@ -42,10 +42,10 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
   return (
     <div style={{
       display: 'grid',
-      gridTemplate: '50px 50px 50px / 50px 50px 50px',
-      gap: '5px',
-      width: '165px',
-      height: '165px'
+      gridTemplate: '35px 35px 35px / 35px 35px 35px',
+      gap: '3px',
+      width: '111px',
+      height: '111px'
     }}>
       <div></div>
       <button 
@@ -53,12 +53,14 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
           ...buttonStyle,
           ...(pressedButtons.has('up') ? getActiveStyle() : {})
         }}
-        onTouchStart={() => {
+        onTouchStart={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => new Set(prev).add('up'));
           handleDirectionPress('up');
-          navigator.vibrate && navigator.vibrate(50);
+          navigator.vibrate && navigator.vibrate(30);
         }}
-        onTouchEnd={() => {
+        onTouchEnd={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => {
             const newSet = new Set(prev);
             newSet.delete('up');
@@ -88,12 +90,14 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
           ...buttonStyle,
           ...(pressedButtons.has('left') ? getActiveStyle() : {})
         }}
-        onTouchStart={() => {
+        onTouchStart={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => new Set(prev).add('left'));
           handleDirectionPress('left');
-          navigator.vibrate && navigator.vibrate(50);
+          navigator.vibrate && navigator.vibrate(30);
         }}
-        onTouchEnd={() => {
+        onTouchEnd={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => {
             const newSet = new Set(prev);
             newSet.delete('left');
@@ -126,12 +130,14 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
           ...buttonStyle,
           ...(pressedButtons.has('right') ? getActiveStyle() : {})
         }}
-        onTouchStart={() => {
+        onTouchStart={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => new Set(prev).add('right'));
           handleDirectionPress('right');
-          navigator.vibrate && navigator.vibrate(50);
+          navigator.vibrate && navigator.vibrate(30);
         }}
-        onTouchEnd={() => {
+        onTouchEnd={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => {
             const newSet = new Set(prev);
             newSet.delete('right');
@@ -161,12 +167,14 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
           ...buttonStyle,
           ...(pressedButtons.has('down') ? getActiveStyle() : {})
         }}
-        onTouchStart={() => {
+        onTouchStart={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => new Set(prev).add('down'));
           handleDirectionPress('down');
-          navigator.vibrate && navigator.vibrate(50);
+          navigator.vibrate && navigator.vibrate(30);
         }}
-        onTouchEnd={() => {
+        onTouchEnd={(e) => {
+          e.preventDefault();
           setPressedButtons(prev => {
             const newSet = new Set(prev);
             newSet.delete('down');
@@ -194,13 +202,15 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
   );
 };
 
-// Action Button Component
-const ActionButton = ({ action }) => {
+// Action Button Component  
+const ActionButton = ({ action, pressedButtons, setPressedButtons }) => {
   const handleActionPress = (type = 'keydown') => {
     const keyMap = {
       'jump': ' ',
       'fire': ' ',
       'rotate': ' ',
+      'restart': 'Enter',
+      'start': ' ',
       'accelerate': 'ArrowUp',
       'brake': 'ArrowDown',
       'left-punch': 'a',
@@ -216,6 +226,8 @@ const ActionButton = ({ action }) => {
     'jump': '🦘',
     'fire': '🔫',
     'rotate': '🔄',
+    'restart': '🔄',
+    'start': '▶️',
     'accelerate': '⚡',
     'brake': '🛑',
     'left-punch': '👊L',
@@ -224,13 +236,13 @@ const ActionButton = ({ action }) => {
   };
   
   const buttonStyle = {
-    width: '60px',
-    height: '60px',
-    background: 'rgba(246, 128, 29, 0.8)',
-    border: '3px solid #3D2A1A',
+    width: '40px',
+    height: '40px',
+    background: 'rgba(246, 128, 29, 0.65)',
+    border: '1px solid rgba(61, 42, 26, 0.8)',
     borderRadius: '50%',
     color: 'white',
-    fontSize: action.includes('punch') ? '12px' : '24px',
+    fontSize: action.includes('punch') ? '8px' : '16px',
     fontWeight: 'bold',
     cursor: 'pointer',
     display: 'flex',
@@ -238,17 +250,47 @@ const ActionButton = ({ action }) => {
     justifyContent: 'center',
     userSelect: 'none',
     touchAction: 'manipulation',
-    boxShadow: '4px 4px 0px #3D2A1A',
+    boxShadow: '2px 2px 0px rgba(61, 42, 26, 0.6)',
     transition: 'all 0.1s ease'
   };
   
   return (
     <button 
-      style={buttonStyle}
-      onTouchStart={() => handleActionPress()}
-      onTouchEnd={() => handleActionPress('keyup')}
-      onMouseDown={() => handleActionPress()}
-      onMouseUp={() => handleActionPress('keyup')}
+      style={{
+        ...buttonStyle,
+        ...(pressedButtons && pressedButtons.has(action) ? {
+          transform: 'translate(1px, 1px)',
+          boxShadow: '1px 1px 0px rgba(61, 42, 26, 0.6)',
+          background: 'rgba(255, 154, 71, 0.8)'
+        } : {})
+      }}
+      onTouchStart={(e) => {
+        e.preventDefault();
+        if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(action));
+        handleActionPress();
+        navigator.vibrate && navigator.vibrate(30);
+      }}
+      onTouchEnd={(e) => {
+        e.preventDefault();
+        if (setPressedButtons) setPressedButtons(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(action);
+          return newSet;
+        });
+        handleActionPress('keyup');
+      }}
+      onMouseDown={() => {
+        if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(action));
+        handleActionPress();
+      }}
+      onMouseUp={() => {
+        if (setPressedButtons) setPressedButtons(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(action);
+          return newSet;
+        });
+        handleActionPress('keyup');
+      }}
     >
       {actionLabels[action] || action}
     </button>
@@ -260,8 +302,13 @@ const GamePlayer = ({ gameId, gameData }) => {
   const touchStartRef = useRef(null);
   const [showControls, setShowControls] = useState(false);
   const [pressedButtons, setPressedButtons] = useState(new Set());
+  const [controlPositions, setControlPositions] = useState({
+    leftMargin: '15px',
+    rightMargin: '15px', 
+    bottomMargin: '15px'
+  });
   
-  // Game-to-control-type mapping
+  // Game-to-control-type mapping - Universal coverage for all 35 games
   const gameControlTypes = {
     'snake': 'directional',
     'pacman': 'directional',
@@ -284,61 +331,86 @@ const GamePlayer = ({ gameId, gameData }) => {
     'casino': 'tap',
     'clickspeed': 'tap',
     'blackjack': 'tap',
-    'stack': 'tap'
+    'stack': 'tap',
+    'tripwire': 'platform',
+    'basejump': 'tap',
+    'longjump': 'tap',
+    'redbirds': 'shooter',
+    'headdriver': 'racing',
+    'battlesnake': 'combat',
+    'bikerunner': 'runner',
+    'boatcombat': 'shooter',
+    'tabletennis': 'paddle'
   };
   
   const controlType = gameControlTypes[gameId] || 'tap';
 
-  // Detect mobile device and show controls
+  // Unified canvas sizing for all devices with enhanced control positioning
   useEffect(() => {
-    const checkMobile = () => {
+    const setupCanvas = () => {
       const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
                     ('ontouchstart' in window) || 
                     (window.innerWidth <= 768);
       setShowControls(mobile);
       
-      // VOLLBILD - Gesamter Screen sichtbar
+      // Calculate optimal control positioning to avoid core gameplay area
+      const calculateControlPositions = () => {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const viewportRatio = screenWidth / screenHeight;
+        
+        // Enhanced positioning based on screen dimensions and game type
+        let leftMargin, rightMargin, bottomMargin;
+        
+        if (screenWidth <= 480) { // Small phones
+          leftMargin = rightMargin = '10px';
+          bottomMargin = '12px';
+        } else if (screenWidth <= 768) { // Large phones/small tablets
+          leftMargin = rightMargin = '15px';
+          bottomMargin = '15px';
+        } else { // Tablets and larger
+          leftMargin = rightMargin = '25px';
+          bottomMargin = '20px';
+        }
+        
+        // Game-specific positioning adjustments for minimal obstruction
+        if (['pong', 'breakout'].includes(gameId)) {
+          // Paddle games need clear horizontal movement
+          bottomMargin = '10px';
+        } else if (['flappybird', 'doodle'].includes(gameId)) {
+          // Vertical games need minimal side obstruction
+          leftMargin = rightMargin = '8px';
+        }
+        
+        setControlPositions({ leftMargin, rightMargin, bottomMargin });
+      };
+      
+      calculateControlPositions();
+      setShowControls(mobile);
+      
+      // UNIFIED ASPECT-RATIO PRESERVING DISPLAY
       if (canvasRef.current) {
         const canvas = canvasRef.current;
         
-        if (mobile) {
-          // Mobile - Kompletter Screen sichtbar
-          const headerHeight = window.innerWidth <= 480 ? 50 : 60;
-          canvas.width = 800; // Original game resolution
-          canvas.height = 600;
-          canvas.style.width = '100vw';
-          canvas.style.height = `calc(100vh - ${headerHeight}px)`;
-          canvas.style.objectFit = 'contain'; // KRITISCH - zeigt ganzes Spiel
-          canvas.style.position = 'absolute';
-          canvas.style.top = '0';
-          canvas.style.left = '0';
-          canvas.style.background = '#000';
-          canvas.style.touchAction = 'none'; // Verhindert Scroll
-          canvas.style.pointerEvents = 'auto'; // Touch erlauben
-          
-          // Body für Vollbild markieren
-          document.body.classList.add('game-active');
-        } else {
-          // Desktop - Normales Layout
-          canvas.width = 800;
-          canvas.height = 600;
-          canvas.style.width = '800px';
-          canvas.style.height = '600px';
-          canvas.style.objectFit = 'initial';
-          canvas.style.position = 'static';
-          canvas.style.top = 'auto';
-          canvas.style.left = 'auto';
-          canvas.style.background = 'transparent';
-          
-          document.body.classList.remove('game-active');
-        }
+        // Always maintain 16:9 aspect ratio
+        canvas.width = 800; // Original game resolution width
+        canvas.height = 450; // 16:9 aspect ratio (800 * 9/16)
+        
+        // Unified styling for all devices
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.aspectRatio = '16/9';
+        canvas.style.objectFit = 'contain';
+        canvas.style.background = '#000';
+        canvas.style.touchAction = 'none';
+        canvas.style.pointerEvents = 'auto';
       }
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    setupCanvas();
+    window.addEventListener('resize', setupCanvas);
     
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', setupCanvas);
   }, []);
   
   useEffect(() => {
@@ -596,8 +668,8 @@ const GamePlayer = ({ gameId, gameData }) => {
       <canvas 
         ref={canvasRef}
         id="gameCanvas" 
-        width={showControls ? window.innerWidth : 800}
-        height={showControls ? (window.innerHeight - 60) : 600}
+        width={800}
+        height={450}
       />
       
       {/* Mobile Control Overlay */}
@@ -617,8 +689,8 @@ const GamePlayer = ({ gameId, gameData }) => {
           {controlType === 'directional' && (
             <div className="d-pad" style={{
               position: 'absolute',
-              left: '20px',
-              bottom: '20px',
+              left: controlPositions.leftMargin,
+              bottom: controlPositions.bottomMargin,
               pointerEvents: 'auto'
             }}>
               <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
@@ -630,19 +702,23 @@ const GamePlayer = ({ gameId, gameData }) => {
             <>
               <div className="d-pad" style={{
                 position: 'absolute',
-                left: '20px',
-                bottom: '20px',
+                left: controlPositions.leftMargin,
+                bottom: controlPositions.bottomMargin,
                 pointerEvents: 'auto'
               }}>
                 <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
               <div className="action-buttons" style={{
                 position: 'absolute',
-                right: '20px',
-                bottom: '20px',
-                pointerEvents: 'auto'
+                right: controlPositions.rightMargin,
+                bottom: controlPositions.bottomMargin,
+                pointerEvents: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px'
               }}>
                 <ActionButton action="jump" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
             </>
           )}
@@ -652,19 +728,23 @@ const GamePlayer = ({ gameId, gameData }) => {
             <>
               <div className="d-pad" style={{
                 position: 'absolute',
-                left: '20px',
-                bottom: '20px',
+                left: controlPositions.leftMargin,
+                bottom: controlPositions.bottomMargin,
                 pointerEvents: 'auto'
               }}>
                 <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
               <div className="action-buttons" style={{
                 position: 'absolute',
-                right: '20px',
-                bottom: '20px',
-                pointerEvents: 'auto'
+                right: controlPositions.rightMargin,
+                bottom: controlPositions.bottomMargin,
+                pointerEvents: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px'
               }}>
                 <ActionButton action="fire" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
             </>
           )}
@@ -674,16 +754,16 @@ const GamePlayer = ({ gameId, gameData }) => {
             <>
               <div className="d-pad" style={{
                 position: 'absolute',
-                left: '20px',
-                bottom: '20px',
+                left: controlPositions.leftMargin,
+                bottom: controlPositions.bottomMargin,
                 pointerEvents: 'auto'
               }}>
                 <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
               <div className="action-buttons" style={{
                 position: 'absolute',
-                right: '20px',
-                bottom: '20px',
+                right: controlPositions.rightMargin,
+                bottom: controlPositions.bottomMargin,
                 pointerEvents: 'auto'
               }}>
                 <ActionButton action="rotate" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
@@ -695,12 +775,12 @@ const GamePlayer = ({ gameId, gameData }) => {
           {controlType === 'racing' && (
             <div className="racing-controls" style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: controlPositions.bottomMargin,
               left: '50%',
               transform: 'translateX(-50%)',
               pointerEvents: 'auto',
               display: 'flex',
-              gap: '20px'
+              gap: '15px'
             }}>
               <ActionButton action="brake" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               <ActionButton action="accelerate" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
@@ -711,14 +791,14 @@ const GamePlayer = ({ gameId, gameData }) => {
           {controlType === 'paddle' && (
             <div className="paddle-hint" style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: controlPositions.bottomMargin,
               left: '50%',
               transform: 'translateX(-50%)',
               color: 'white',
-              background: 'rgba(0,0,0,0.7)',
-              padding: '10px',
+              background: 'rgba(0,0,0,0.6)',
+              padding: '8px 12px',
               borderRadius: '5px',
-              fontSize: '14px'
+              fontSize: '12px'
             }}>
               {gameId === 'pong' ? 'Tap top/bottom half to move paddle' : 'Swipe left/right to move paddle'}
             </div>
@@ -726,33 +806,43 @@ const GamePlayer = ({ gameId, gameData }) => {
           
           {/* Tap Game Controls */}
           {controlType === 'tap' && (
-            <div className="tap-hint" style={{
-              position: 'absolute',
-              bottom: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              background: 'rgba(0,0,0,0.7)',
-              padding: '10px',
-              borderRadius: '5px',
-              fontSize: '14px'
-            }}>
-              Tap anywhere to play
-            </div>
+            <>
+              <div className="tap-action" style={{
+                position: 'absolute',
+                right: controlPositions.rightMargin,
+                bottom: controlPositions.bottomMargin,
+                pointerEvents: 'auto'
+              }}>
+                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              </div>
+              <div className="tap-hint" style={{
+                position: 'absolute',
+                bottom: controlPositions.bottomMargin,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'white',
+                background: 'rgba(0,0,0,0.6)',
+                padding: '6px 10px',
+                borderRadius: '5px',
+                fontSize: '10px'
+              }}>
+                Tap ▶️ or screen to play
+              </div>
+            </>
           )}
           
           {/* Runner Game Controls */}
           {controlType === 'runner' && (
             <div className="runner-hint" style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: controlPositions.bottomMargin,
               left: '50%',
               transform: 'translateX(-50%)',
               color: 'white',
-              background: 'rgba(0,0,0,0.7)',
-              padding: '10px',
+              background: 'rgba(0,0,0,0.6)',
+              padding: '8px 12px',
               borderRadius: '5px',
-              fontSize: '14px'
+              fontSize: '12px'
             }}>
               Swipe left/right/up/down to dodge
             </div>
@@ -763,15 +853,15 @@ const GamePlayer = ({ gameId, gameData }) => {
             <>
               <div className="combat-left" style={{
                 position: 'absolute',
-                left: '20px',
-                bottom: '20px',
+                left: controlPositions.leftMargin,
+                bottom: controlPositions.bottomMargin,
                 pointerEvents: 'auto'
               }}>
                 <ActionButton action="left-punch" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
               </div>
               <div className="combat-center" style={{
                 position: 'absolute',
-                bottom: '20px',
+                bottom: controlPositions.bottomMargin,
                 left: '50%',
                 transform: 'translateX(-50%)',
                 pointerEvents: 'auto'
@@ -780,8 +870,8 @@ const GamePlayer = ({ gameId, gameData }) => {
               </div>
               <div className="combat-right" style={{
                 position: 'absolute',
-                right: '20px',
-                bottom: '20px',
+                right: controlPositions.rightMargin,
+                bottom: controlPositions.bottomMargin,
                 pointerEvents: 'auto'
               }}>
                 <ActionButton action="right-punch" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
@@ -793,14 +883,14 @@ const GamePlayer = ({ gameId, gameData }) => {
           {controlType === 'continuous' && (
             <div className="continuous-hint" style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: controlPositions.bottomMargin,
               left: '50%',
               transform: 'translateX(-50%)',
               color: 'white',
-              background: 'rgba(0,0,0,0.7)',
-              padding: '10px',
+              background: 'rgba(0,0,0,0.6)',
+              padding: '8px 12px',
               borderRadius: '5px',
-              fontSize: '14px'
+              fontSize: '12px'
             }}>
               Touch and drag to steer
             </div>

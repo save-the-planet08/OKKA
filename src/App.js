@@ -328,8 +328,10 @@ const App = () => {
                   {Object.entries(getFilteredGames()).map(([gameId, game]) => (
                     <div key={gameId} className="game-card" onClick={() => handleGameClick(gameId)}>
                       <div className="game-thumbnail">{game.emoji}</div>
-                      <h3>{game.title}</h3>
-                      <p>{game.description}</p>
+                      <div>
+                        <h3>{game.title}</h3>
+                        <p>{game.description}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
