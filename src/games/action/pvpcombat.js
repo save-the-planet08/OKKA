@@ -1,6 +1,6 @@
 export function initPvPCombat(canvas, ctx) {
     canvas.width = 800;
-    canvas.height = 600;
+    canvas.height = 450;
     
     let gameRunning = true;
     let animationId;
@@ -965,7 +965,7 @@ export function initPvPCombat(canvas, ctx) {
         
         if (gameState === 'setup') {
             if (x >= canvas.width/2 - 100 && x <= canvas.width/2 + 100 &&
-                y >= 480 && y <= 540) {
+                y >= 360 && y <= 405) {
                 startBattle();
             }
         } else if (gameState === 'victory') {

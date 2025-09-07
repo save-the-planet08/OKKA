@@ -1,49 +1,85 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getGameImplementation } from '../games/index.js';
 
-// Virtual D-pad Component
-const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
-  const handleDirectionPress = (direction, type = 'keydown') => {
-    const keyMap = {
-      'up': 'ArrowUp',
-      'down': 'ArrowDown', 
-      'left': 'ArrowLeft',
-      'right': 'ArrowRight'
+// Universal Key Button Component
+const KeyButton = ({ keyValue, label, pressedButtons, setPressedButtons }) => {
+  const handleKeyPress = (type = 'keydown') => {
+    const getKeyProperties = (key) => {
+      switch(key) {
+        case ' ': return { code: 'Space', keyCode: 32, which: 32 };
+        case 'Enter': return { code: 'Enter', keyCode: 13, which: 13 };
+        case 'Escape': return { code: 'Escape', keyCode: 27, which: 27 };
+        case 'ArrowUp': return { code: 'ArrowUp', keyCode: 38, which: 38 };
+        case 'ArrowDown': return { code: 'ArrowDown', keyCode: 40, which: 40 };
+        case 'ArrowLeft': return { code: 'ArrowLeft', keyCode: 37, which: 37 };
+        case 'ArrowRight': return { code: 'ArrowRight', keyCode: 39, which: 39 };
+        case 'w': return { code: 'KeyW', keyCode: 87, which: 87 };
+        case 'a': return { code: 'KeyA', keyCode: 65, which: 65 };
+        case 's': return { code: 'KeyS', keyCode: 83, which: 83 };
+        case 'd': return { code: 'KeyD', keyCode: 68, which: 68 };
+        case 'q': return { code: 'KeyQ', keyCode: 81, which: 81 };
+        case 'e': return { code: 'KeyE', keyCode: 69, which: 69 };
+        case 'r': return { code: 'KeyR', keyCode: 82, which: 82 };
+        case 't': return { code: 'KeyT', keyCode: 84, which: 84 };
+        case 'x': return { code: 'KeyX', keyCode: 88, which: 88 };
+        case 'z': return { code: 'KeyZ', keyCode: 90, which: 90 };
+        case 'c': return { code: 'KeyC', keyCode: 67, which: 67 };
+        case '1': return { code: 'Digit1', keyCode: 49, which: 49 };
+        case '2': return { code: 'Digit2', keyCode: 50, which: 50 };
+        case '3': return { code: 'Digit3', keyCode: 51, which: 51 };
+        default: return { code: `Key${key.toUpperCase()}`, keyCode: key.charCodeAt(0), which: key.charCodeAt(0) };
+      }
     };
     
-    const key = keyMap[direction];
-    
-    // Create proper keyboard event with all necessary properties
+    const keyProps = getKeyProperties(keyValue);
     const keyboardEvent = new KeyboardEvent(type, { 
-      key: key,
-      code: key,
-      keyCode: key === 'ArrowUp' ? 38 : key === 'ArrowDown' ? 40 : key === 'ArrowLeft' ? 37 : 39,
-      which: key === 'ArrowUp' ? 38 : key === 'ArrowDown' ? 40 : key === 'ArrowLeft' ? 37 : 39,
+      key: keyValue,
+      code: keyProps.code,
+      keyCode: keyProps.keyCode,
+      which: keyProps.which,
       bubbles: true,
       cancelable: true
     });
     
-    console.log(`Dispatching ${type} for direction: ${direction} (key: ${key})`);
+    console.log(`Dispatching ${type} for key: ${keyValue} (${label})`);
     
-    // Dispatch to both document and canvas
+    // Special handling for Enter key in PvP Combat - simulate click for game start
+    if (keyValue === 'Enter' && type === 'keydown' && !document._pvpClickProcessed) {
+      const canvas = document.querySelector('#gameCanvas');
+      if (canvas && window.location.hash.includes('pvpcombat')) {
+        document._pvpClickProcessed = true;
+        setTimeout(() => {
+          const rect = canvas.getBoundingClientRect();
+          const clickEvent = new MouseEvent('click', {
+            clientX: rect.left + 400,
+            clientY: rect.top + 380,
+            bubbles: true,
+            cancelable: true
+          });
+          canvas.dispatchEvent(clickEvent);
+          setTimeout(() => { document._pvpClickProcessed = false; }, 100);
+        }, 10);
+      }
+    }
+    
+    // Dispatch to multiple targets to ensure games receive the event
     document.dispatchEvent(keyboardEvent);
+    document.body.dispatchEvent(keyboardEvent);
     const canvas = document.querySelector('#gameCanvas');
     if (canvas) {
       canvas.dispatchEvent(keyboardEvent);
     }
-    
-    // Also try the legacy way
     window.dispatchEvent(keyboardEvent);
   };
   
   const buttonStyle = {
     width: '35px',
     height: '35px',
-    background: 'rgba(246, 128, 29, 0.65)',
-    border: '1px solid rgba(61, 42, 26, 0.8)',
-    borderRadius: '8px',
+    background: 'rgba(246, 128, 29, 0.7)',
+    border: '1px solid rgba(61, 42, 26, 0.9)',
+    borderRadius: '6px',
     color: 'white',
-    fontSize: '14px',
+    fontSize: '11px',
     fontWeight: 'bold',
     cursor: 'pointer',
     display: 'flex',
@@ -51,419 +87,113 @@ const VirtualDPad = ({ pressedButtons, setPressedButtons }) => {
     justifyContent: 'center',
     userSelect: 'none',
     touchAction: 'manipulation',
-    boxShadow: '1px 1px 0px rgba(61, 42, 26, 0.6)',
-    transition: 'all 0.1s ease'
-  };
-  
-  const getActiveStyle = () => ({
-    transform: 'translate(2px, 2px)',
-    boxShadow: '1px 1px 0px #3D2A1A',
-    background: 'rgba(255, 154, 71, 0.9)'
-  });
-  
-  return (
-    <div style={{
-      display: 'grid',
-      gridTemplate: '35px 35px 35px / 35px 35px 35px',
-      gap: '3px',
-      width: '111px',
-      height: '111px'
-    }}>
-      <div></div>
-      <button 
-        style={{
-          ...buttonStyle,
-          ...(pressedButtons.has('up') ? getActiveStyle() : {})
-        }}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('D-pad up touched');
-          setPressedButtons(prev => new Set(prev).add('up'));
-          handleDirectionPress('up');
-          navigator.vibrate && navigator.vibrate(30);
-        }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('up');
-            return newSet;
-          });
-          handleDirectionPress('up', 'keyup');
-        }}
-        onMouseDown={() => {
-          setPressedButtons(prev => new Set(prev).add('up'));
-          handleDirectionPress('up');
-        }}
-        onMouseUp={() => {
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('up');
-            return newSet;
-          });
-          handleDirectionPress('up', 'keyup');
-        }}
-      >
-        ↑
-      </button>
-      <div></div>
-      
-      <button 
-        style={{
-          ...buttonStyle,
-          ...(pressedButtons.has('left') ? getActiveStyle() : {})
-        }}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => new Set(prev).add('left'));
-          handleDirectionPress('left');
-          navigator.vibrate && navigator.vibrate(30);
-        }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('left');
-            return newSet;
-          });
-          handleDirectionPress('left', 'keyup');
-        }}
-        onMouseDown={() => {
-          setPressedButtons(prev => new Set(prev).add('left'));
-          handleDirectionPress('left');
-        }}
-        onMouseUp={() => {
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('left');
-            return newSet;
-          });
-          handleDirectionPress('left', 'keyup');
-        }}
-      >
-        ←
-      </button>
-      <div style={{
-        ...buttonStyle,
-        background: 'rgba(61, 42, 26, 0.5)',
-        cursor: 'default'
-      }}></div>
-      <button 
-        style={{
-          ...buttonStyle,
-          ...(pressedButtons.has('right') ? getActiveStyle() : {})
-        }}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => new Set(prev).add('right'));
-          handleDirectionPress('right');
-          navigator.vibrate && navigator.vibrate(30);
-        }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('right');
-            return newSet;
-          });
-          handleDirectionPress('right', 'keyup');
-        }}
-        onMouseDown={() => {
-          setPressedButtons(prev => new Set(prev).add('right'));
-          handleDirectionPress('right');
-        }}
-        onMouseUp={() => {
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('right');
-            return newSet;
-          });
-          handleDirectionPress('right', 'keyup');
-        }}
-      >
-        →
-      </button>
-      
-      <div></div>
-      <button 
-        style={{
-          ...buttonStyle,
-          ...(pressedButtons.has('down') ? getActiveStyle() : {})
-        }}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => new Set(prev).add('down'));
-          handleDirectionPress('down');
-          navigator.vibrate && navigator.vibrate(30);
-        }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('down');
-            return newSet;
-          });
-          handleDirectionPress('down', 'keyup');
-        }}
-        onMouseDown={() => {
-          setPressedButtons(prev => new Set(prev).add('down'));
-          handleDirectionPress('down');
-        }}
-        onMouseUp={() => {
-          setPressedButtons(prev => {
-            const newSet = new Set(prev);
-            newSet.delete('down');
-            return newSet;
-          });
-          handleDirectionPress('down', 'keyup');
-        }}
-      >
-        ↓
-      </button>
-      <div></div>
-    </div>
-  );
-};
-
-// Action Button Component  
-const ActionButton = ({ action, pressedButtons, setPressedButtons }) => {
-  const handleActionPress = (type = 'keydown') => {
-    const keyMap = {
-      'jump': ' ',
-      'fire': ' ',
-      'rotate': ' ',
-      'restart': 'r',
-      'start': ' ',
-      'accelerate': 'ArrowUp',
-      'brake': 'ArrowDown',
-      'left-punch': 'a',
-      'right-punch': 'd',
-      'block': 's'
-    };
-    
-    const key = keyMap[action] || ' ';
-    
-    // Create proper keyboard event with all necessary properties
-    const keyboardEvent = new KeyboardEvent(type, { 
-      key: key,
-      code: key === ' ' ? 'Space' : key === 'r' ? 'KeyR' : key,
-      keyCode: key === ' ' ? 32 : key === 'r' ? 82 : key.charCodeAt(0),
-      which: key === ' ' ? 32 : key === 'r' ? 82 : key.charCodeAt(0),
-      bubbles: true,
-      cancelable: true
-    });
-    
-    console.log(`Dispatching ${type} for key: ${key} (action: ${action})`);
-    
-    // Dispatch to both document and canvas
-    document.dispatchEvent(keyboardEvent);
-    const canvas = document.querySelector('#gameCanvas');
-    if (canvas) {
-      canvas.dispatchEvent(keyboardEvent);
-    }
-    
-    // Also try the legacy way
-    window.dispatchEvent(keyboardEvent);
-  };
-  
-  const actionLabels = {
-    'jump': '🦘',
-    'fire': '🔫',
-    'rotate': '🔄',
-    'restart': 'R',
-    'start': '▶️',
-    'accelerate': '⚡',
-    'brake': '🛑',
-    'left-punch': '👊L',
-    'right-punch': '👊R',
-    'block': '🛡️'
-  };
-  
-  const buttonStyle = {
-    width: '40px',
-    height: '40px',
-    background: 'rgba(246, 128, 29, 0.65)',
-    border: '1px solid rgba(61, 42, 26, 0.8)',
-    borderRadius: '50%',
-    color: 'white',
-    fontSize: action.includes('punch') ? '8px' : '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    userSelect: 'none',
-    touchAction: 'manipulation',
-    boxShadow: '2px 2px 0px rgba(61, 42, 26, 0.6)',
-    transition: 'all 0.1s ease'
+    boxShadow: '1px 1px 0px rgba(61, 42, 26, 0.7)',
+    transition: 'all 0.1s ease',
+    margin: '1px'
   };
   
   return (
     <button 
       style={{
         ...buttonStyle,
-        ...(pressedButtons && pressedButtons.has(action) ? {
+        ...(pressedButtons && pressedButtons.has(keyValue) ? {
           transform: 'translate(1px, 1px)',
-          boxShadow: '1px 1px 0px rgba(61, 42, 26, 0.6)',
-          background: 'rgba(255, 154, 71, 0.8)'
+          boxShadow: '0px 0px 0px rgba(61, 42, 26, 0.7)',
+          background: 'rgba(255, 154, 71, 0.9)'
         } : {})
       }}
       onTouchStart={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Action button touched:', action);
-        if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(action));
-        handleActionPress();
-        navigator.vibrate && navigator.vibrate(30);
+        if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(keyValue));
+        handleKeyPress();
+        navigator.vibrate && navigator.vibrate(25);
       }}
       onTouchEnd={(e) => {
         e.preventDefault();
         if (setPressedButtons) setPressedButtons(prev => {
           const newSet = new Set(prev);
-          newSet.delete(action);
+          newSet.delete(keyValue);
           return newSet;
         });
-        handleActionPress('keyup');
+        handleKeyPress('keyup');
       }}
       onMouseDown={() => {
-        if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(action));
-        handleActionPress();
+        if (setPressedButtons) setPressedButtons(prev => new Set(prev).add(keyValue));
+        handleKeyPress();
       }}
       onMouseUp={() => {
         if (setPressedButtons) setPressedButtons(prev => {
           const newSet = new Set(prev);
-          newSet.delete(action);
+          newSet.delete(keyValue);
           return newSet;
         });
-        handleActionPress('keyup');
+        handleKeyPress('keyup');
       }}
     >
-      {actionLabels[action] || action}
+      {label}
     </button>
   );
 };
 
 const GamePlayer = ({ gameId, gameData }) => {
   const canvasRef = useRef(null);
-  const touchStartRef = useRef(null);
-  const [showControls, setShowControls] = useState(true); // Force show for debugging
+  const [showControls, setShowControls] = useState(true);
   const [pressedButtons, setPressedButtons] = useState(new Set());
-  const [controlPositions, setControlPositions] = useState({
-    leftMargin: '15px',
-    rightMargin: '15px', 
-    bottomMargin: '15px'
-  });
   
-  // Game-to-control-type mapping - Universal coverage for all 35 games
-  const gameControlTypes = {
-    'snake': 'directional',
-    'pacman': 'directional',
-    'frogger': 'directional', 
-    'tetris': 'puzzle',
-    'spaceinvaders': 'shooter',
-    'asteroids': 'shooter',
-    'duckhunt': 'shooter',
-    'mario': 'platform',
-    'flappybird': 'tap',
-    'doodle': 'platform',
-    'subway': 'runner',
-    'hillclimb': 'racing',
-    'rider': 'racing',
-    'pong': 'paddle',
-    'breakout': 'paddle',
-    'slither': 'continuous',
-    'pvpcombat': 'combat',
-    'boxing': 'combat',
-    'casino': 'tap',
-    'clickspeed': 'tap',
-    'blackjack': 'tap',
-    'stack': 'tap',
-    'tripwire': 'platform',
-    'basejump': 'tap',
-    'longjump': 'tap',
-    'redbirds': 'shooter',
-    'headdriver': 'racing',
-    'battlesnake': 'combat',
-    'bikerunner': 'runner',
-    'boatcombat': 'shooter',
-    'tabletennis': 'paddle'
+  // Minimalistic game-specific control mapping - only essential buttons
+  const getGameControls = (gameId) => {
+    switch(gameId) {
+      case 'tetris': return ['←', '→', '↓', '↑', 'R']; // Move, rotate, restart
+      case 'snake': return ['←', '→', '↑', '↓', 'R']; // Direction, restart
+      case 'pacman': return ['←', '→', '↑', '↓', 'R']; // Direction, restart  
+      case 'frogger': return ['←', '→', '↑', '↓', 'R']; // Direction, restart
+      case 'pong': return ['↑', '↓', 'R']; // Paddle up/down, restart
+      case 'breakout': return ['←', '→', 'R']; // Paddle left/right, restart
+      case 'flappybird': return ['SPC', 'R']; // Jump, restart
+      case 'doodle': return ['←', '→', 'R']; // Move left/right, restart
+      case 'spaceinvaders': return ['←', '→', 'SPC', 'R']; // Move, shoot, restart
+      case 'asteroids': return ['←', '→', '↑', 'SPC', 'R']; // Turn, thrust, shoot, restart
+      case 'mario': return ['←', '→', 'SPC', 'R']; // Move, jump, restart
+      case 'subway': return ['←', '→', '↑', '↓', 'R']; // Lane switch, jump/duck, restart
+      case 'hillclimb': return ['←', '→', 'R']; // Accelerate/brake, restart
+      case 'rider': return ['←', '→', 'R']; // Lean, restart
+      case 'duckhunt': return ['R']; // Mouse game, only restart
+      case 'pvpcombat': return ['W', 'A', 'S', 'D', '←', '→', '↑', '↓', 'SPC', 'ENT', 'R']; // Full combat controls
+      case 'boxing': return ['←', '→', 'SPC', 'R']; // Move, punch, restart
+      case 'casino': return ['SPC', 'R']; // Spin, restart
+      case 'blackjack': return ['SPC', 'ENT', 'R']; // Hit, stand, restart
+      case 'clickspeed': return ['SPC', 'R']; // Click, restart
+      case 'stack': return ['SPC', 'R']; // Drop, restart
+      case 'basejump': return ['←', '→', 'SPC', 'R']; // Steer, deploy chute, restart
+      case 'longjump': return ['SPC', 'R']; // Jump, restart
+      case 'tripwire': return ['←', '→', 'SPC', 'R']; // Swing, hook, restart
+      case 'slither': return ['R']; // Mouse controlled, only restart
+      case 'redbirds': return ['SPC', 'R']; // Launch, restart
+      case 'headdriver': return ['←', '→', 'SPC', 'R']; // Drive, shoot, restart
+      case 'battlesnake': return ['←', '→', '↑', '↓', 'SPC', 'R']; // Snake movement, action, restart
+      case 'bikerunner': return ['←', '→', '↑', '↓', 'R']; // Movement, restart
+      case 'boatcombat': return ['←', '→', '↑', '↓', 'SPC', 'R']; // Navigate, shoot, restart
+      case 'tabletennis': return ['←', '→', '↑', '↓', 'R']; // Paddle control, restart
+      default: return ['←', '→', '↑', '↓', 'SPC', 'R']; // Basic controls
+    }
   };
   
-  const controlType = gameControlTypes[gameId] || 'tap';
-
-  // Unified canvas sizing for all devices with enhanced control positioning
+  // Simple canvas setup
   useEffect(() => {
     const setupCanvas = () => {
-      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                    ('ontouchstart' in window) || 
-                    (window.innerWidth <= 768) ||
-                    ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0);
+      if (!canvasRef.current) return;
       
-      console.log('Mobile detection:', {
-        userAgent: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-        ontouchstart: ('ontouchstart' in window),
-        screenWidth: window.innerWidth,
-        widthCheck: window.innerWidth <= 768,
-        touchPoints: navigator.maxTouchPoints,
-        finalMobile: mobile
-      });
-      
-      // Force show controls for debugging mobile issues
-      setShowControls(true); // Always show for debugging
-      
-      // Calculate optimal control positioning to avoid core gameplay area
-      const calculateControlPositions = () => {
-        const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight;
-        const viewportRatio = screenWidth / screenHeight;
-        
-        // Enhanced positioning based on screen dimensions and game type
-        let leftMargin, rightMargin, bottomMargin;
-        
-        if (screenWidth <= 480) { // Small phones
-          leftMargin = rightMargin = '10px';
-          bottomMargin = '12px';
-        } else if (screenWidth <= 768) { // Large phones/small tablets
-          leftMargin = rightMargin = '15px';
-          bottomMargin = '15px';
-        } else { // Tablets and larger
-          leftMargin = rightMargin = '25px';
-          bottomMargin = '20px';
-        }
-        
-        // Game-specific positioning adjustments for minimal obstruction
-        if (['pong', 'breakout'].includes(gameId)) {
-          // Paddle games need clear horizontal movement
-          bottomMargin = '10px';
-        } else if (['flappybird', 'doodle'].includes(gameId)) {
-          // Vertical games need minimal side obstruction
-          leftMargin = rightMargin = '8px';
-        }
-        
-        setControlPositions({ leftMargin, rightMargin, bottomMargin });
-      };
-      
-      calculateControlPositions();
-      setShowControls(mobile);
-      
-      // UNIFIED ASPECT-RATIO PRESERVING DISPLAY
-      if (canvasRef.current) {
-        const canvas = canvasRef.current;
-        
-        // Always maintain 16:9 aspect ratio
-        canvas.width = 800; // Original game resolution width
-        canvas.height = 450; // 16:9 aspect ratio (800 * 9/16)
-        
-        // Unified styling for all devices
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        canvas.style.aspectRatio = '16/9';
-        canvas.style.objectFit = 'contain';
-        canvas.style.background = '#000';
-        canvas.style.touchAction = 'none';
-        canvas.style.pointerEvents = 'auto';
-      }
+      const canvas = canvasRef.current;
+      canvas.width = 800;
+      canvas.height = 450;
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+      canvas.style.maxWidth = '800px';
+      canvas.style.maxHeight = '450px';
+      canvas.style.border = '2px solid #3D2A1A';
+      canvas.style.borderRadius = '8px';
+      canvas.style.backgroundColor = '#000';
     };
     
     setupCanvas();
@@ -472,6 +202,7 @@ const GamePlayer = ({ gameId, gameData }) => {
     return () => window.removeEventListener('resize', setupCanvas);
   }, []);
   
+  // Game initialization
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -483,212 +214,20 @@ const GamePlayer = ({ gameId, gameData }) => {
         window.currentGameCleanup = null;
       }
       
-      // Add touch support
-      const handleTouchStart = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        touchStartRef.current = {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top,
-          time: Date.now()
-        };
-      };
-      
-      const handleTouchMove = (e) => {
-        e.preventDefault();
-      };
-      
-      const handleTouchEnd = (e) => {
-        e.preventDefault();
-        if (!touchStartRef.current) return;
-        
-        const touch = e.changedTouches[0];
-        const rect = canvas.getBoundingClientRect();
-        const endX = touch.clientX - rect.left;
-        const endY = touch.clientY - rect.top;
-        const deltaX = endX - touchStartRef.current.x;
-        const deltaY = endY - touchStartRef.current.y;
-        const deltaTime = Date.now() - touchStartRef.current.time;
-        
-        // Enhanced touch controls for all games
-        const handleTouchControls = () => {
-          // Swipe detection for movement games
-          if (['snake', 'tetris', 'pacman', 'frogger'].includes(gameId)) {
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-              if (deltaX > 0) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-              }
-            } else if (Math.abs(deltaY) > 30) {
-              if (deltaY > 0) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-              }
-            } else if (deltaTime < 200) {
-              // Quick tap actions
-              if (gameId === 'tetris') {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' })); // Rotate
-              }
-            }
-          }
-          // Vertical paddle games
-          else if (gameId === 'pong' || gameId === 'breakout') {
-            if (gameId === 'pong') {
-              const canvasHeight = canvas.height;
-              if (endY < canvasHeight / 2) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' })), 100);
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' })), 100);
-              }
-            } else { // breakout
-              if (deltaX > 10) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' })), 100);
-              } else if (deltaX < -10) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' })), 100);
-              }
-            }
-          }
-          // Jump/tap games
-          else if (['flappybird', 'doodle', 'mario', 'subway'].includes(gameId)) {
-            if (gameId === 'subway') {
-              // Lane switching for Subway Surfers
-              if (Math.abs(deltaX) > 50) {
-                if (deltaX > 0) {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                } else {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                }
-              } else if (deltaY < -50) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' })); // Jump
-              } else if (deltaY > 50) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' })); // Duck
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' })); // Jump
-              }
-            } else if (gameId === 'mario') {
-              // Mario movement
-              if (Math.abs(deltaX) > 30) {
-                if (deltaX > 0) {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' })), 200);
-                } else {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' })), 200);
-                }
-              }
-              if (deltaY < -30 || deltaTime < 200) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' })); // Jump
-              }
-            } else if (gameId === 'doodle') {
-              // Doodle Jump - horizontal movement
-              if (Math.abs(deltaX) > 30) {
-                if (deltaX > 0) {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' })), 150);
-                } else {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' })), 150);
-                }
-              }
-            } else {
-              // Flappy Bird - any tap jumps
-              window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
-            }
-          }
-          // Shooter games
-          else if (['spaceinvaders', 'asteroids', 'duckhunt'].includes(gameId)) {
-            if (gameId === 'spaceinvaders') {
-              if (Math.abs(deltaX) > 30) {
-                if (deltaX > 0) {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' })), 100);
-                } else {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' })), 100);
-                }
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' })); // Shoot
-              }
-            } else if (gameId === 'asteroids') {
-              if (deltaTime < 200) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' })); // Shoot
-              } else if (Math.abs(deltaX) > 30) {
-                if (deltaX > 0) {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' })), 100);
-                } else {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                  setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' })), 100);
-                }
-              } else if (deltaY < -30) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' })); // Thrust
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' })), 100);
-              }
-            }
-            // Duck Hunt uses mouse events, handled separately
-          }
-          // Racing games
-          else if (['hillclimb', 'rider'].includes(gameId)) {
-            if (Math.abs(deltaX) > 30) {
-              if (deltaX > 0) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' })), 200);
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-                setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' })), 200);
-              }
-            }
-          }
-          // Boxing game controls
-          else if (gameId === 'boxing') {
-            if (Math.abs(deltaX) > 30) {
-              if (deltaX > 0) {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' })); // Right punch
-              } else {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' })); // Left punch
-              }
-            } else if (deltaTime < 200) {
-              // Quick tap for block
-              window.dispatchEvent(new KeyboardEvent('keydown', { key: 's' })); // Block
-              setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 's' })), 300);
-            }
-          }
-          // IO games like Slither use mouse movement, handled separately
-        };
-        
-        handleTouchControls();
-        
-        touchStartRef.current = null;
-      };
-      
-      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-      canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-      canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-      
-      // Initialize game using new modular architecture
       try {
-        const gameInitializer = getGameImplementation(gameId, gameData);
-        gameInitializer(canvas, ctx);
-        
-        // Enhanced cleanup wrapper
-        const originalCleanup = window.currentGameCleanup;
-        window.currentGameCleanup = () => {
-          // Call game-specific cleanup first
-          if (originalCleanup) originalCleanup();
-          
-          // Clean up touch events
-          canvas.removeEventListener('touchstart', handleTouchStart);
-          canvas.removeEventListener('touchmove', handleTouchMove);
-          canvas.removeEventListener('touchend', handleTouchEnd);
-        };
+        // Load and initialize the game
+        const gameImplementation = getGameImplementation(gameId);
+        if (gameImplementation) {
+          gameImplementation(canvas, ctx);
+        } else {
+          console.error(`No implementation found for game: ${gameId}`);
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#FF0000';
+          ctx.font = '24px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('Game Not Found', canvas.width/2, canvas.height/2);
+        }
       } catch (error) {
         console.error(`Error initializing game ${gameId}:`, error);
         
@@ -702,12 +241,6 @@ const GamePlayer = ({ gameId, gameData }) => {
         ctx.fillStyle = 'white';
         ctx.font = '16px Arial';
         ctx.fillText('Please try reloading', canvas.width/2, canvas.height/2 + 20);
-        
-        window.currentGameCleanup = () => {
-          canvas.removeEventListener('touchstart', handleTouchStart);
-          canvas.removeEventListener('touchmove', handleTouchMove);
-          canvas.removeEventListener('touchend', handleTouchEnd);
-        };
       }
     }
     
@@ -717,8 +250,6 @@ const GamePlayer = ({ gameId, gameData }) => {
         window.currentGameCleanup();
         window.currentGameCleanup = null;
       }
-      // Vollbild-Modus beenden
-      document.body.classList.remove('game-active');
     };
   }, [gameId]);
 
@@ -731,342 +262,186 @@ const GamePlayer = ({ gameId, gameData }) => {
         height={450}
       />
       
-      {/* Mobile Control Overlay */}
-      {showControls && (
-        <div className="mobile-controls" style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          pointerEvents: 'none',
-          zIndex: 1000,
-          touchAction: 'none'
-        }}>
-          
-          {/* Directional Controls */}
-          {controlType === 'directional' && (
-            <div className="d-pad" style={{
+      {/* Minimal Game-Specific Controls */}
+      {showControls && (() => {
+        const controls = getGameControls(gameId);
+        const keyMap = {
+          '←': { key: 'ArrowLeft', label: '←' },
+          '→': { key: 'ArrowRight', label: '→' }, 
+          '↑': { key: 'ArrowUp', label: '↑' },
+          '↓': { key: 'ArrowDown', label: '↓' },
+          'SPC': { key: ' ', label: 'SPC' },
+          'ENT': { key: 'Enter', label: 'ENT' },
+          'R': { key: 'r', label: 'R' },
+          'W': { key: 'w', label: 'W' },
+          'A': { key: 'a', label: 'A' },
+          'S': { key: 's', label: 'S' },
+          'D': { key: 'd', label: 'D' }
+        };
+        
+        // Check if we have directional controls
+        const hasArrows = controls.includes('←') || controls.includes('→') || controls.includes('↑') || controls.includes('↓');
+        const hasWASD = controls.includes('W') || controls.includes('A') || controls.includes('S') || controls.includes('D');
+        
+        if (hasArrows && hasWASD) {
+          // PvP Combat with both WASD and arrows - special layout
+          return (
+            <div className="mobile-controls" style={{
               position: 'absolute',
-              left: controlPositions.leftMargin,
-              bottom: controlPositions.bottomMargin,
-              pointerEvents: 'auto'
-            }}>
-              <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-            </div>
-          )}
-          
-          {/* Platform Game Controls */}
-          {controlType === 'platform' && (
-            <>
-              <div className="d-pad" style={{
-                position: 'absolute',
-                left: controlPositions.leftMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="action-buttons" style={{
-                position: 'absolute',
-                right: controlPositions.rightMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px'
-              }}>
-                <ActionButton action="jump" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-            </>
-          )}
-          
-          {/* Shooter Game Controls */}
-          {controlType === 'shooter' && (
-            <>
-              <div className="d-pad" style={{
-                position: 'absolute',
-                left: controlPositions.leftMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="action-buttons" style={{
-                position: 'absolute',
-                right: controlPositions.rightMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px'
-              }}>
-                <ActionButton action="fire" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-            </>
-          )}
-          
-          {/* Puzzle Game Controls */}
-          {controlType === 'puzzle' && (
-            <>
-              <div className="d-pad" style={{
-                position: 'absolute',
-                left: controlPositions.leftMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="action-buttons" style={{
-                position: 'absolute',
-                right: controlPositions.rightMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <ActionButton action="rotate" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-            </>
-          )}
-          
-          {/* Racing Game Controls */}
-          {controlType === 'racing' && (
-            <div className="racing-controls" style={{
-              position: 'absolute',
-              bottom: controlPositions.bottomMargin,
+              bottom: '15px',
               left: '50%',
               transform: 'translateX(-50%)',
               pointerEvents: 'auto',
               display: 'flex',
-              gap: '15px'
+              gap: '16px',
+              padding: '12px 16px',
+              background: 'rgba(0,0,0,0.25)',
+              borderRadius: '16px',
+              zIndex: 1000,
+              touchAction: 'none'
             }}>
-              <ActionButton action="brake" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              <ActionButton action="accelerate" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              {/* WASD Grid */}
+              <div style={{ display: 'grid', gridTemplate: '30px 30px / 30px 30px 30px', gap: '3px' }}>
+                <div></div>
+                <KeyButton keyValue="w" label="W" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <div></div>
+                <KeyButton keyValue="a" label="A" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <KeyButton keyValue="s" label="S" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <KeyButton keyValue="d" label="D" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              </div>
+              
+              {/* Arrow Grid */}
+              <div style={{ display: 'grid', gridTemplate: '30px 30px / 30px 30px 30px', gap: '3px' }}>
+                <div></div>
+                <KeyButton keyValue="ArrowUp" label="↑" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <div></div>
+                <KeyButton keyValue="ArrowLeft" label="←" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <KeyButton keyValue="ArrowDown" label="↓" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+                <KeyButton keyValue="ArrowRight" label="→" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
+              </div>
+              
+              {/* Other buttons */}
+              {controls.filter(c => !['W','A','S','D','←','→','↑','↓'].includes(c)).map(control => {
+                const mapped = keyMap[control];
+                return mapped ? (
+                  <KeyButton 
+                    key={control}
+                    keyValue={mapped.key}
+                    label={mapped.label}
+                    pressedButtons={pressedButtons}
+                    setPressedButtons={setPressedButtons}
+                  />
+                ) : null;
+              })}
             </div>
-          )}
+          );
+        } else if (hasArrows || hasWASD) {
+          // Single directional control set
+          const directions = hasArrows ? ['↑','←','↓','→'] : ['W','A','S','D'];
+          const directionsInGame = directions.filter(d => controls.includes(d));
+          const otherControls = controls.filter(c => !directions.includes(c));
           
-          {/* Paddle Game Controls */}
-          {controlType === 'paddle' && (
-            <>
-              {gameId === 'pong' ? (
-                // Pong needs up/down controls
-                <div className="pong-controls" style={{
-                  position: 'absolute',
-                  right: controlPositions.rightMargin,
-                  bottom: controlPositions.bottomMargin,
-                  pointerEvents: 'auto',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '5px'
-                }}>
-                  <ActionButton action="accelerate" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-                  <ActionButton action="brake" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-                </div>
-              ) : (
-                // Breakout needs left/right controls
-                <div className="breakout-controls" style={{
-                  position: 'absolute',
-                  bottom: controlPositions.bottomMargin,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  pointerEvents: 'auto',
-                  display: 'flex',
-                  gap: '10px'
-                }}>
-                  <button 
-                    style={{
-                      width: '50px',
-                      height: '40px',
-                      background: 'rgba(246, 128, 29, 0.65)',
-                      border: '1px solid rgba(61, 42, 26, 0.8)',
-                      borderRadius: '8px',
-                      color: 'white',
-                      fontSize: '16px',
-                      cursor: 'pointer',
-                      touchAction: 'manipulation'
-                    }}
-                    onTouchStart={(e) => {
-                      e.preventDefault();
-                      const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', keyCode: 37, which: 37, bubbles: true });
-                      document.dispatchEvent(event);
-                    }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      const event = new KeyboardEvent('keyup', { key: 'ArrowLeft', keyCode: 37, which: 37, bubbles: true });
-                      document.dispatchEvent(event);
-                    }}
-                  >←</button>
-                  <button 
-                    style={{
-                      width: '50px',
-                      height: '40px',
-                      background: 'rgba(246, 128, 29, 0.65)',
-                      border: '1px solid rgba(61, 42, 26, 0.8)',
-                      borderRadius: '8px',
-                      color: 'white',
-                      fontSize: '16px',
-                      cursor: 'pointer',
-                      touchAction: 'manipulation'
-                    }}
-                    onTouchStart={(e) => {
-                      e.preventDefault();
-                      const event = new KeyboardEvent('keydown', { key: 'ArrowRight', keyCode: 39, which: 39, bubbles: true });
-                      document.dispatchEvent(event);
-                    }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      const event = new KeyboardEvent('keyup', { key: 'ArrowRight', keyCode: 39, which: 39, bubbles: true });
-                      document.dispatchEvent(event);
-                    }}
-                  >→</button>
-                </div>
-              )}
-              <div className="paddle-hint" style={{
-                position: 'absolute',
-                bottom: controlPositions.bottomMargin,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: 'white',
-                background: 'rgba(0,0,0,0.6)',
-                padding: '6px 10px',
-                borderRadius: '5px',
-                fontSize: '10px'
-              }}>
-                {gameId === 'pong' ? 'Use ⚡🛑 to move paddle up/down' : 'Use ←→ to move paddle'}
+          return (
+            <div className="mobile-controls" style={{
+              position: 'absolute',
+              bottom: '15px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              pointerEvents: 'auto',
+              display: 'flex',
+              gap: '16px',
+              padding: '12px 16px',
+              background: 'rgba(0,0,0,0.25)',
+              borderRadius: '16px',
+              zIndex: 1000,
+              touchAction: 'none'
+            }}>
+              {/* Directional Grid */}
+              <div style={{ display: 'grid', gridTemplate: '30px 30px / 30px 30px 30px', gap: '3px' }}>
+                <div></div>
+                {directionsInGame.includes(hasArrows ? '↑' : 'W') ? (
+                  <KeyButton 
+                    keyValue={keyMap[hasArrows ? '↑' : 'W'].key} 
+                    label={keyMap[hasArrows ? '↑' : 'W'].label}
+                    pressedButtons={pressedButtons} 
+                    setPressedButtons={setPressedButtons} 
+                  />
+                ) : <div></div>}
+                <div></div>
+                {directionsInGame.includes(hasArrows ? '←' : 'A') ? (
+                  <KeyButton 
+                    keyValue={keyMap[hasArrows ? '←' : 'A'].key} 
+                    label={keyMap[hasArrows ? '←' : 'A'].label}
+                    pressedButtons={pressedButtons} 
+                    setPressedButtons={setPressedButtons} 
+                  />
+                ) : <div></div>}
+                {directionsInGame.includes(hasArrows ? '↓' : 'S') ? (
+                  <KeyButton 
+                    keyValue={keyMap[hasArrows ? '↓' : 'S'].key} 
+                    label={keyMap[hasArrows ? '↓' : 'S'].label}
+                    pressedButtons={pressedButtons} 
+                    setPressedButtons={setPressedButtons} 
+                  />
+                ) : <div></div>}
+                {directionsInGame.includes(hasArrows ? '→' : 'D') ? (
+                  <KeyButton 
+                    keyValue={keyMap[hasArrows ? '→' : 'D'].key} 
+                    label={keyMap[hasArrows ? '→' : 'D'].label}
+                    pressedButtons={pressedButtons} 
+                    setPressedButtons={setPressedButtons} 
+                  />
+                ) : <div></div>}
               </div>
-            </>
-          )}
-          
-          {/* Tap Game Controls */}
-          {controlType === 'tap' && (
-            <>
-              <div className="tap-actions" style={{
-                position: 'absolute',
-                right: controlPositions.rightMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px'
-              }}>
-                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-                <ActionButton action="restart" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="tap-hint" style={{
-                position: 'absolute',
-                bottom: controlPositions.bottomMargin,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: 'white',
-                background: 'rgba(0,0,0,0.6)',
-                padding: '6px 10px',
-                borderRadius: '5px',
-                fontSize: '10px'
-              }}>
-                Tap ▶️ to start, R to restart
-              </div>
-            </>
-          )}
-          
-          {/* Runner Game Controls */}
-          {controlType === 'runner' && (
-            <>
-              <div className="runner-dpad" style={{
-                position: 'absolute',
-                left: controlPositions.leftMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="runner-actions" style={{
-                position: 'absolute',
-                right: controlPositions.rightMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px'
-              }}>
-                <ActionButton action="jump" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-                <ActionButton action="start" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="runner-hint" style={{
-                position: 'absolute',
-                bottom: controlPositions.bottomMargin,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: 'white',
-                background: 'rgba(0,0,0,0.6)',
-                padding: '6px 10px',
-                borderRadius: '5px',
-                fontSize: '10px'
-              }}>
-                Use D-pad to move, 🦘 to jump
-              </div>
-            </>
-          )}
-          
-          {/* Combat Game Controls */}
-          {controlType === 'combat' && (
-            <>
-              <div className="combat-left" style={{
-                position: 'absolute',
-                left: controlPositions.leftMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <ActionButton action="left-punch" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="combat-center" style={{
-                position: 'absolute',
-                bottom: controlPositions.bottomMargin,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                pointerEvents: 'auto'
-              }}>
-                <ActionButton action="block" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="combat-right" style={{
-                position: 'absolute',
-                right: controlPositions.rightMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <ActionButton action="right-punch" pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-            </>
-          )}
-          
-          {/* Continuous Movement (like Slither) */}
-          {controlType === 'continuous' && (
-            <>
-              <div className="continuous-dpad" style={{
-                position: 'absolute',
-                left: controlPositions.leftMargin,
-                bottom: controlPositions.bottomMargin,
-                pointerEvents: 'auto'
-              }}>
-                <VirtualDPad pressedButtons={pressedButtons} setPressedButtons={setPressedButtons} />
-              </div>
-              <div className="continuous-hint" style={{
-                position: 'absolute',
-                bottom: controlPositions.bottomMargin,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: 'white',
-                background: 'rgba(0,0,0,0.6)',
-                padding: '6px 10px',
-                borderRadius: '5px',
-                fontSize: '10px'
-              }}>
-                Use D-pad or touch screen to steer
-              </div>
-            </>
-          )}
-        </div>
-      )}
+              
+              {/* Other buttons */}
+              {otherControls.map(control => {
+                const mapped = keyMap[control];
+                return mapped ? (
+                  <KeyButton 
+                    key={control}
+                    keyValue={mapped.key}
+                    label={mapped.label}
+                    pressedButtons={pressedButtons}
+                    setPressedButtons={setPressedButtons}
+                  />
+                ) : null;
+              })}
+            </div>
+          );
+        } else {
+          // No directional controls - simple horizontal layout
+          return (
+            <div className="mobile-controls" style={{
+              position: 'absolute',
+              bottom: '15px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              pointerEvents: 'auto',
+              display: 'flex',
+              gap: '12px',
+              padding: '12px 16px',
+              background: 'rgba(0,0,0,0.25)',
+              borderRadius: '16px',
+              zIndex: 1000,
+              touchAction: 'none'
+            }}>
+              {controls.map(control => {
+                const mapped = keyMap[control];
+                return mapped ? (
+                  <KeyButton 
+                    key={control}
+                    keyValue={mapped.key}
+                    label={mapped.label}
+                    pressedButtons={pressedButtons}
+                    setPressedButtons={setPressedButtons}
+                  />
+                ) : null;
+              })}
+            </div>
+          );
+        }
+      })()}
     </div>
   );
 };

@@ -266,9 +266,11 @@ const App = () => {
       <header className="header">
         <div className="logo" onClick={() => {setCurrentView('home'); setCurrentGame(null);}}>
           <img src={logoImage} alt="OKKA Logo" className="logo-image" />
-          <h1>OKKA</h1>
-          <p>Online-Spiele. Kostenlos. Keine Anmeldung.</p>
-          <span className="logo-claim">Tausend und ein Spiel. Nur hier.</span>
+          <div className="logo-text">
+            <h1>OKKA</h1>
+            <p>Online-Spiele. Kostenlos. Keine Anmeldung.</p>
+            <span className="logo-claim">Tausend und ein Spiel. Nur hier.</span>
+          </div>
         </div>
         <nav className="nav">
           {categories.map(category => (
