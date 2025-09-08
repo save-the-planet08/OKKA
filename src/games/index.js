@@ -46,6 +46,7 @@ import { initBlackjack } from './puzzle/blackjack.js';
 
 // Additional Arcade Games
 import { initStack } from './arcade/stack.js';
+import { initJumpAndRun } from './arcade/jumpandrun.js';
 
 // Base game implementations map
 const baseGameImplementations = {
@@ -70,7 +71,8 @@ const baseGameImplementations = {
     'casino': initCasino,
     'clickspeed': initClickSpeed,
     'blackjack': initBlackjack,
-    'stack': initStack
+    'stack': initStack,
+    'jumpandrun': initJumpAndRun
 };
 
 // Apply performance optimization to all games (temporarily disabled for testing)

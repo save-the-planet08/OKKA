@@ -210,7 +210,12 @@ export function initStack(canvas, ctx) {
             ctx.font = '24px Arial';
             ctx.fillText(`Final Score: ${score}`, canvas.width/2, canvas.height/2);
             ctx.fillText(`Height: ${level} blocks`, canvas.width/2, canvas.height/2 + 30);
-            ctx.fillText('Press R to restart', canvas.width/2, canvas.height/2 + 80);
+            // Restart button
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(canvas.width/2 - 80, canvas.height/2 + 60, 160, 40);
+            ctx.fillStyle = '#FFF';
+            ctx.font = '20px Arial';
+            ctx.fillText('RESTART', canvas.width/2, canvas.height/2 + 85);
             
             ctx.textAlign = 'left';
         }
@@ -234,11 +239,19 @@ export function initStack(canvas, ctx) {
         }
     }
     
-    function handleClick() {
+    function handleClick(e) {
         if (!gameOver) {
             handleInput();
         } else {
-            initGame();
+            // Check restart button click
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (x >= canvas.width/2 - 80 && x <= canvas.width/2 + 80 && 
+                y >= canvas.height/2 + 60 && y <= canvas.height/2 + 100) {
+                initGame();
+            }
         }
     }
     

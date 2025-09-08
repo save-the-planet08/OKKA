@@ -18,7 +18,7 @@ export function initFrogger(canvas, ctx) {
         
         for (let row = ROWS - 6; row >= ROWS - 10; row--) {
             const direction = (row % 2 === 0) ? 1 : -1;
-            const speed = 1 + Math.random() * 2;
+            const speed = (1 + Math.random() * 2) * 0.7;
             
             for (let i = 0; i < 3; i++) {
                 cars.push({
@@ -117,32 +117,117 @@ export function initFrogger(canvas, ctx) {
         ctx.fillRect(0, 0, canvas.width, 2 * GRID_SIZE);
         ctx.fillRect(0, (ROWS - 5) * GRID_SIZE, canvas.width, 5 * GRID_SIZE);
         
-        ctx.fillStyle = '#FF0000';
         cars.forEach(car => {
+            // Car body with gradient effect
+            const gradient = ctx.createLinearGradient(
+                car.x * GRID_SIZE, 
+                car.y * GRID_SIZE + 5,
+                car.x * GRID_SIZE, 
+                car.y * GRID_SIZE + GRID_SIZE - 5
+            );
+            gradient.addColorStop(0, '#FF4444');
+            gradient.addColorStop(0.5, '#FF0000');
+            gradient.addColorStop(1, '#CC0000');
+            ctx.fillStyle = gradient;
             ctx.fillRect(
                 car.x * GRID_SIZE, 
                 car.y * GRID_SIZE + 5, 
                 car.width * GRID_SIZE - 5, 
                 GRID_SIZE - 10
             );
+            
+            // Car windows
+            ctx.fillStyle = '#444488';
+            ctx.fillRect(
+                car.x * GRID_SIZE + 3, 
+                car.y * GRID_SIZE + 8, 
+                car.width * GRID_SIZE - 11, 
+                8
+            );
+            
+            // Car highlights
+            ctx.fillStyle = '#FFAAAA';
+            ctx.fillRect(
+                car.x * GRID_SIZE + 2, 
+                car.y * GRID_SIZE + 6, 
+                car.width * GRID_SIZE - 9, 
+                2
+            );
         });
         
-        ctx.fillStyle = '#8B4513';
         logs.forEach(log => {
+            // Log body with wood texture
+            const gradient = ctx.createLinearGradient(
+                log.x * GRID_SIZE, 
+                log.y * GRID_SIZE + 8,
+                log.x * GRID_SIZE, 
+                log.y * GRID_SIZE + GRID_SIZE - 8
+            );
+            gradient.addColorStop(0, '#CD853F');
+            gradient.addColorStop(0.5, '#8B4513');
+            gradient.addColorStop(1, '#654321');
+            ctx.fillStyle = gradient;
             ctx.fillRect(
                 log.x * GRID_SIZE, 
                 log.y * GRID_SIZE + 8, 
                 log.width * GRID_SIZE - 5, 
                 GRID_SIZE - 16
             );
+            
+            // Wood rings
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < log.width; i++) {
+                ctx.beginPath();
+                ctx.arc(
+                    (log.x + i + 0.5) * GRID_SIZE, 
+                    log.y * GRID_SIZE + GRID_SIZE / 2, 
+                    8, 0, Math.PI * 2
+                );
+                ctx.stroke();
+            }
         });
         
-        ctx.fillStyle = '#00FF00';
+        // Frog body
+        ctx.fillStyle = '#00CC00';
         ctx.fillRect(
             frog.x * GRID_SIZE + 8, 
             frog.y * GRID_SIZE + 8, 
             GRID_SIZE - 16, 
             GRID_SIZE - 16
+        );
+        
+        // Frog highlights
+        ctx.fillStyle = '#00FF00';
+        ctx.fillRect(
+            frog.x * GRID_SIZE + 10, 
+            frog.y * GRID_SIZE + 10, 
+            GRID_SIZE - 20, 
+            4
+        );
+        
+        // Frog eyes
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(
+            frog.x * GRID_SIZE + 12, 
+            frog.y * GRID_SIZE + 10, 
+            4, 4
+        );
+        ctx.fillRect(
+            frog.x * GRID_SIZE + GRID_SIZE - 16, 
+            frog.y * GRID_SIZE + 10, 
+            4, 4
+        );
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(
+            frog.x * GRID_SIZE + 14, 
+            frog.y * GRID_SIZE + 12, 
+            2, 2
+        );
+        ctx.fillRect(
+            frog.x * GRID_SIZE + GRID_SIZE - 14, 
+            frog.y * GRID_SIZE + 12, 
+            2, 2
         );
         
         ctx.fillStyle = 'white';

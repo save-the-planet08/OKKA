@@ -165,6 +165,7 @@ const GamePlayer = ({ gameId, gameData }) => {
       case 'blackjack': return ['SPC', 'ENT', 'R']; // Hit, stand, restart
       case 'clickspeed': return ['SPC', 'R']; // Click, restart
       case 'stack': return ['SPC', 'R']; // Drop, restart
+      case 'jumpandrun': return ['←', '→', 'SPC', 'R']; // Move, jump, restart
       case 'basejump': return ['←', '→', 'SPC', 'R']; // Steer, deploy chute, restart
       case 'longjump': return ['SPC', 'R']; // Jump, restart
       case 'tripwire': return ['←', '→', 'SPC', 'R']; // Swing, hook, restart
@@ -202,6 +203,22 @@ const GamePlayer = ({ gameId, gameData }) => {
     return () => window.removeEventListener('resize', setupCanvas);
   }, []);
   
+  // Prevent arrow key scrolling in game view
+  useEffect(() => {
+    const preventArrowScroll = (e) => {
+      if (e.key.startsWith('Arrow') || e.key === ' ') {
+        e.preventDefault();
+        // DON'T stopPropagation - let the game receive the events
+      }
+    };
+
+    document.addEventListener('keydown', preventArrowScroll);
+    
+    return () => {
+      document.removeEventListener('keydown', preventArrowScroll);
+    };
+  }, []);
+
   // Game initialization
   useEffect(() => {
     if (canvasRef.current) {

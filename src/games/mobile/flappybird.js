@@ -124,8 +124,14 @@ export function initFlappyBird(canvas, ctx) {
             ctx.font = '24px Arial';
             ctx.strokeText('Score: ' + score, canvas.width/2, canvas.height/2 + 50);
             ctx.fillText('Score: ' + score, canvas.width/2, canvas.height/2 + 50);
-            ctx.strokeText('Press R to restart', canvas.width/2, canvas.height/2 + 80);
-            ctx.fillText('Press R to restart', canvas.width/2, canvas.height/2 + 80);
+            
+            // Restart button
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(canvas.width/2 - 80, canvas.height/2 + 70, 160, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.strokeText('RESTART', canvas.width/2, canvas.height/2 + 95);
+            ctx.fillText('RESTART', canvas.width/2, canvas.height/2 + 95);
         }
         
         ctx.textAlign = 'left';
@@ -151,6 +157,8 @@ export function initFlappyBird(canvas, ctx) {
         }
         document.removeEventListener('keydown', handleKeyPress);
         canvas.removeEventListener('click', handleClick);
+        canvas.removeEventListener('touchstart', handleTouch);
+        canvas.removeEventListener('touchend', handleTouch);
     }
     
     function jump() {
@@ -182,12 +190,46 @@ export function initFlappyBird(canvas, ctx) {
         }
     }
     
-    function handleClick() {
+    function handleClick(e) {
+        e.preventDefault();
+        
+        if (!gameRunning && gameStarted) {
+            // Check restart button click
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (x >= canvas.width/2 - 80 && x <= canvas.width/2 + 80 && 
+                y >= canvas.height/2 + 70 && y <= canvas.height/2 + 110) {
+                // Restart game
+                bird = { x: 100, y: canvas.height/2, dy: 0, size: 20 };
+                pipes = [];
+                score = 0;
+                gameRunning = true;
+                gameStarted = false;
+                pipeTimer = 0;
+                if (animationId) cancelAnimationFrame(animationId);
+                animationId = requestAnimationFrame(gameLoop);
+                return;
+            }
+        }
+        
         jump();
     }
     
+    function handleTouch(e) {
+        e.preventDefault();
+        jump();
+    }
+    
+    // Full-screen touch/click controls
     document.addEventListener('keydown', handleKeyPress);
     canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('touchstart', handleTouch, { passive: false });
+    canvas.addEventListener('touchend', handleTouch, { passive: false });
+    
+    // Make canvas responsive for full-screen touch
+    canvas.style.touchAction = 'none';
     
     animationId = requestAnimationFrame(gameLoop);
     

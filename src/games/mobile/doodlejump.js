@@ -7,8 +7,8 @@ export function initDoodleJump(canvas, ctx) {
     let animationId = null;
     let highestY = canvas.height - 100;
     
-    const GRAVITY = 0.4;
-    const JUMP_FORCE = -12;
+    const GRAVITY = 0.3;
+    const JUMP_FORCE = -14;
     const PLATFORM_WIDTH = 80;
     const PLATFORM_HEIGHT = 15;
     
@@ -26,8 +26,8 @@ export function initDoodleJump(canvas, ctx) {
         for (let i = 1; i < 100; i++) {
             platforms.push({
                 x: Math.random() * (canvas.width - PLATFORM_WIDTH),
-                y: canvas.height - 50 - (i * 120),
-                type: Math.random() < 0.1 ? 'spring' : 'normal'
+                y: canvas.height - 50 - (i * 100),
+                type: Math.random() < 0.15 ? 'spring' : 'normal'
             });
         }
     }
@@ -86,11 +86,23 @@ export function initDoodleJump(canvas, ctx) {
             const screenY = platform.y - camera.y;
             if (screenY > -PLATFORM_HEIGHT && screenY < canvas.height + PLATFORM_HEIGHT) {
                 if (platform.type === 'spring') {
-                    ctx.fillStyle = '#FF6B6B';
+                    // Enhanced spring platform with better contrast
+                    ctx.fillStyle = '#E74C3C';
+                    ctx.fillRect(platform.x, screenY, PLATFORM_WIDTH, PLATFORM_HEIGHT);
+                    ctx.fillStyle = '#C0392B';
+                    ctx.fillRect(platform.x + 2, screenY + 2, PLATFORM_WIDTH - 4, PLATFORM_HEIGHT - 4);
                 } else {
-                    ctx.fillStyle = '#90EE90';
+                    // Enhanced normal platform with better contrast
+                    ctx.fillStyle = '#2ECC71';
+                    ctx.fillRect(platform.x, screenY, PLATFORM_WIDTH, PLATFORM_HEIGHT);
+                    ctx.fillStyle = '#27AE60';
+                    ctx.fillRect(platform.x + 2, screenY + 2, PLATFORM_WIDTH - 4, PLATFORM_HEIGHT - 4);
                 }
-                ctx.fillRect(platform.x, screenY, PLATFORM_WIDTH, PLATFORM_HEIGHT);
+                
+                // Add black border for better contrast
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(platform.x, screenY, PLATFORM_WIDTH, PLATFORM_HEIGHT);
                 
                 if (platform.type === 'spring') {
                     ctx.fillStyle = '#FF0000';
@@ -125,8 +137,13 @@ export function initDoodleJump(canvas, ctx) {
             ctx.font = '24px Arial';
             ctx.strokeText('Score: ' + score, canvas.width/2, canvas.height/2 + 40);
             ctx.fillText('Score: ' + score, canvas.width/2, canvas.height/2 + 40);
-            ctx.strokeText('Press R to restart', canvas.width/2, canvas.height/2 + 70);
-            ctx.fillText('Press R to restart', canvas.width/2, canvas.height/2 + 70);
+            // Restart button
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(canvas.width/2 - 80, canvas.height/2 + 50, 160, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.strokeText('RESTART', canvas.width/2, canvas.height/2 + 75);
+            ctx.fillText('RESTART', canvas.width/2, canvas.height/2 + 75);
             ctx.textAlign = 'left';
         }
     }
@@ -149,6 +166,7 @@ export function initDoodleJump(canvas, ctx) {
         }
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
+        canvas.removeEventListener('click', handleClick);
     }
     
     function handleKeyDown(e) {
@@ -170,8 +188,31 @@ export function initDoodleJump(canvas, ctx) {
         keys[e.key] = false;
     }
     
+    function handleClick(e) {
+        if (!gameRunning) {
+            // Check restart button click
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (x >= canvas.width/2 - 80 && x <= canvas.width/2 + 80 && 
+                y >= canvas.height/2 + 50 && y <= canvas.height/2 + 90) {
+                // Restart game
+                player = { x: canvas.width/2, y: canvas.height - 100, dy: 0, width: 20, height: 20 };
+                camera = { y: 0 };
+                score = 0;
+                gameRunning = true;
+                highestY = canvas.height - 100;
+                if (animationId) cancelAnimationFrame(animationId);
+                generatePlatforms();
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+    }
+    
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
+    canvas.addEventListener('click', handleClick);
     
     generatePlatforms();
     animationId = requestAnimationFrame(gameLoop);

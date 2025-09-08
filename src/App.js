@@ -148,6 +148,12 @@ const App = () => {
       description: "Baue den höchsten Turm",
       emoji: "🏗️"
     },
+    jumpandrun: {
+      title: "Jump & Run Adventure",
+      category: "arcade",
+      description: "Springe über Plattformen und sammle Münzen",
+      emoji: "🏃‍♂️"
+    },
     tripwire: {
       title: "Tripwire Hook",
       category: "action",

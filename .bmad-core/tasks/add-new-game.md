@@ -19,13 +19,14 @@ Streamlined implementation of new games to the OKKA gaming platform with automat
 ### 1. Game Implementation Requirements
 
 **Technical Standards:**
-- [ ] Canvas-based rendering (800x600 default)
-- [ ] Modular export structure: `export const init{GameName} = (canvas, ctx) => {}`
-- [ ] Proper cleanup function returned for memory management
+- [ ] Canvas-based rendering (800x450 default - 16:9 aspect ratio)
+- [ ] Modular export structure: `export function init{GameName}(canvas, ctx) {}`
+- [ ] Proper cleanup using `window.currentGameCleanup` pattern
 - [ ] Arrow key preventDefault() for all games using keyboard controls
 - [ ] Game state management (running/stopped/restart with 'R' key)
 - [ ] Score system with proper display
 - [ ] Game over detection and restart functionality
+- [ ] Mobile control mapping in GamePlayer.js `getGameControls()` function
 
 **User Experience Standards:**
 - [ ] Intuitive controls (keyboard/mouse AND mobile touch)
@@ -50,7 +51,11 @@ Create new game file in appropriate category folder:
 #### Step 2: Game Architecture Template
 
 ```javascript
-export const init{GameName} = (canvas, ctx) => {
+export function init{GameName}(canvas, ctx) {
+    // Set canvas dimensions
+    canvas.width = 800;
+    canvas.height = 450;
+    
     // Game state variables
     let gameRunning = true;
     let animationId = null;
@@ -107,6 +112,7 @@ export const init{GameName} = (canvas, ctx) => {
             animationId = null;
         }
         document.removeEventListener('keydown', handleKeyPress);
+        document.removeEventListener('keyup', handleKeyUp);
         // Remove other event listeners
     }
     
@@ -120,8 +126,7 @@ export const init{GameName} = (canvas, ctx) => {
             // Restart game logic
             // ... reset variables
             gameRunning = true;
-            if (animationId) cancelAnimationFrame(animationId);
-            animationId = requestAnimationFrame(gameLoop);
+            gameLoop();
         }
         
         if (gameRunning) {
@@ -132,33 +137,47 @@ export const init{GameName} = (canvas, ctx) => {
         }
     }
     
+    function handleKeyUp(e) {
+        // Handle key releases if needed
+        // ... keyup logic
+    }
+    
     // Initialize event listeners
     document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keyup', handleKeyUp);
+    
+    // Set up cleanup function
+    window.currentGameCleanup = stopGame;
     
     // Start game loop
-    animationId = requestAnimationFrame(gameLoop);
-    
-    // Return cleanup function
-    return stopGame;
+    gameLoop();
 };
 ```
 
 #### Step 3: Register Game
 
-1. **Add to GamePlayer.js imports:**
+1. **Add to `/src/games/index.js` imports:**
 ```javascript
-import { init{GameName} } from '../games/{category}/{gamename}.js';
+import { init{GameName} } from './{category}/{gamename}.js';
 ```
 
-2. **Add to gameInitializers object:**
+2. **Add to `getGameImplementation` function:**
 ```javascript
-const gameInitializers = {
+export function getGameImplementation(gameId) {
+  switch (gameId) {
     // ... existing games
-    {gamekey}: init{GameName}
-};
+    case '{gamekey}': return init{GameName};
+    // ...
+  }
+}
 ```
 
-3. **Add to App.js games object:**
+3. **Add mobile controls to GamePlayer.js `getGameControls()` function:**
+```javascript
+case '{gamekey}': return ['←', '→', '↑', '↓', 'SPC', 'R']; // Adjust based on game needs
+```
+
+4. **Add to App.js games object:**
 ```javascript
 {gamekey}: {
     title: "{Game Display Name}",
@@ -182,12 +201,13 @@ const gameInitializers = {
 - [ ] Enemy spawn rates are reasonable and not overwhelming
 
 **Mobile Compatibility:**
-- [ ] Touch controls work (automatically handled by GamePlayer)
-- [ ] Game designed mobile-first with swipe/tap interactions
+- [ ] Mobile controls defined in `getGameControls()` function with minimal essential buttons
+- [ ] Controls use proper directional layouts (cross formation for arrows/WASD)
 - [ ] Game scales properly on mobile screens  
 - [ ] UI elements are readable on small screens
 - [ ] No complex multi-key combinations required
 - [ ] All controls accessible with thumbs
+- [ ] Touch controls positioned to avoid screen obstruction
 
 **User Experience:**
 - [ ] Game is fun and engaging from the first play
@@ -203,10 +223,11 @@ const gameInitializers = {
 **CRITICAL: You MUST complete ALL implementation steps before providing the response:**
 
 1. **FIRST**: Create the complete game file with all functionality
-2. **SECOND**: Add import to GamePlayer.js 
-3. **THIRD**: Add game to gameInitializers object in GamePlayer.js
-4. **FOURTH**: Add game entry to App.js games object
-5. **FIFTH**: Test that the game loads and works properly
+2. **SECOND**: Add import to `/src/games/index.js`
+3. **THIRD**: Add game to `getGameImplementation()` function in `/src/games/index.js`
+4. **FOURTH**: Add mobile controls to `getGameControls()` function in GamePlayer.js
+5. **FIFTH**: Add game entry to App.js games object
+6. **SIXTH**: Test that the game loads and works properly with both desktop and mobile controls
 
 **ONLY AFTER** completing all implementation steps, provide the Instagram post response.
 

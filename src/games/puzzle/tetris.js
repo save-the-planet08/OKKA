@@ -1,6 +1,6 @@
 export const initTetris = (canvas, ctx) => {
   const BOARD_WIDTH = 10;
-  const BOARD_HEIGHT = 20;
+  const BOARD_HEIGHT = 15;
   const BLOCK_SIZE = 30;
   
   let board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
@@ -34,7 +34,7 @@ export const initTetris = (canvas, ctx) => {
   function drawBlock(x, y, color) {
     ctx.fillStyle = colors[color];
     ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#fff';
     ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
   }
   
@@ -87,10 +87,15 @@ export const initTetris = (canvas, ctx) => {
   }
   
   function placePiece() {
+    
     for (let y = 0; y < currentPiece.shape.length; y++) {
       for (let x = 0; x < currentPiece.shape[y].length; x++) {
         if (currentPiece.shape[y][x]) {
-          board[currentPiece.y + y][currentPiece.x + x] = currentPiece.color;
+          const boardY = currentPiece.y + y;
+          const boardX = currentPiece.x + x;
+          if (boardY >= 0) { // Only place blocks that are visible
+            board[boardY][boardX] = currentPiece.color;
+          }
         }
       }
     }

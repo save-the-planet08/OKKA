@@ -202,22 +202,66 @@ export const initBoxing = (canvas, ctx) => {
     }
     
     function draw() {
-        // Clear canvas
-        ctx.fillStyle = '#2c3e50';
+        // Clear canvas with arena atmosphere
+        const gradient = ctx.createRadialGradient(
+            canvas.width/2, canvas.height/2, 0,
+            canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
+        );
+        gradient.addColorStop(0, '#34495e');
+        gradient.addColorStop(0.7, '#2c3e50');
+        gradient.addColorStop(1, '#1a252f');
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Draw boxing ring
-        ctx.fillStyle = '#8B4513';
+        // Draw boxing ring with texture
+        const ringGradient = ctx.createLinearGradient(0, canvas.height - 50, 0, canvas.height);
+        ringGradient.addColorStop(0, '#CD853F');
+        ringGradient.addColorStop(0.3, '#8B4513');
+        ringGradient.addColorStop(1, '#654321');
+        ctx.fillStyle = ringGradient;
         ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
         
-        // Draw ring ropes
+        // Ring canvas texture lines
+        ctx.strokeStyle = '#A0522D';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < canvas.width; i += 20) {
+            ctx.beginPath();
+            ctx.moveTo(i, canvas.height - 50);
+            ctx.lineTo(i, canvas.height);
+            ctx.stroke();
+        }
+        
+        // Draw ring ropes with enhanced detail
+        // Top rope
         ctx.strokeStyle = '#FF0000';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 6;
         ctx.beginPath();
         ctx.moveTo(0, canvas.height - 200);
         ctx.lineTo(canvas.width, canvas.height - 200);
+        ctx.stroke();
+        
+        // Rope highlight
+        ctx.strokeStyle = '#FF6666';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 202);
+        ctx.lineTo(canvas.width, canvas.height - 202);
+        ctx.stroke();
+        
+        // Bottom rope
+        ctx.strokeStyle = '#FF0000';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
         ctx.moveTo(0, canvas.height - 120);
         ctx.lineTo(canvas.width, canvas.height - 120);
+        ctx.stroke();
+        
+        // Bottom rope highlight
+        ctx.strokeStyle = '#FF6666';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 122);
+        ctx.lineTo(canvas.width, canvas.height - 122);
         ctx.stroke();
         
         // Draw boxers
@@ -258,17 +302,47 @@ export const initBoxing = (canvas, ctx) => {
     }
     
     function drawBoxer(boxer, color, isPlayer) {
-        // Body
-        ctx.fillStyle = color;
+        // Body with muscle definition
+        const bodyGradient = ctx.createLinearGradient(
+            boxer.x, boxer.y, boxer.x + boxer.width, boxer.y
+        );
+        bodyGradient.addColorStop(0, color);
+        bodyGradient.addColorStop(0.5, isPlayer ? '#2980b9' : '#c0392b');
+        bodyGradient.addColorStop(1, color);
+        ctx.fillStyle = bodyGradient;
         ctx.fillRect(boxer.x, boxer.y, boxer.width, boxer.height);
         
-        // Head
-        ctx.fillStyle = '#FDBCB4';
+        // Muscle highlights
+        ctx.fillStyle = isPlayer ? '#5dade2' : '#e74c3c';
+        ctx.fillRect(boxer.x + 10, boxer.y + 20, boxer.width - 20, 8);
+        ctx.fillRect(boxer.x + 15, boxer.y + 40, boxer.width - 30, 6);
+        
+        // Head with better skin tone
+        const headGradient = ctx.createRadialGradient(
+            boxer.x + 30, boxer.y - 20, 5,
+            boxer.x + 30, boxer.y - 20, 25
+        );
+        headGradient.addColorStop(0, '#FDBCB4');
+        headGradient.addColorStop(1, '#E8A488');
+        ctx.fillStyle = headGradient;
         ctx.fillRect(boxer.x + 15, boxer.y - 40, 30, 40);
         
-        // Boxing gloves
-        ctx.fillStyle = '#8B0000';
-        const gloveSize = 20;
+        // Face features
+        ctx.fillStyle = '#333';
+        ctx.fillRect(boxer.x + 20, boxer.y - 30, 2, 2); // Left eye
+        ctx.fillRect(boxer.x + 28, boxer.y - 30, 2, 2); // Right eye
+        ctx.fillRect(boxer.x + 24, boxer.y - 20, 2, 1); // Nose
+        
+        // Boxing gloves with enhanced detail
+        const gloveSize = 22;
+        const gloveGradient = ctx.createRadialGradient(
+            boxer.x, boxer.y + 20, 5,
+            boxer.x, boxer.y + 20, gloveSize
+        );
+        gloveGradient.addColorStop(0, '#FF4444');
+        gloveGradient.addColorStop(0.7, '#8B0000');
+        gloveGradient.addColorStop(1, '#660000');
+        ctx.fillStyle = gloveGradient;
         
         if (isPlayer) {
             // Left glove
